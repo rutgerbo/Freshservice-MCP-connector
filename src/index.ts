@@ -34,20 +34,17 @@ registerConfigureInstanceTool(server);
 const app = express();
 app.use(express.json());
 
+const transport = new StreamableHTTPServerTransport({
+  sessionIdGenerator: undefined,
+});
+
+server.connect(transport);
+
 app.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
 app.all("/mcp", async (req, res) => {
-  const transport = new StreamableHTTPServerTransport({
-    sessionIdGenerator: undefined,
-  });
-
-  res.on("close", () => {
-    transport.close();
-  });
-
-  await server.connect(transport);
   await transport.handleRequest(req, res, req.body);
 });
 
