@@ -33,23 +33,23 @@ registerSearchTools(server);
 registerSyncTools(server);
 registerConfigureInstanceTool(server);
 
-const transport = new StreamableHTTPServerTransport({
-  sessionIdGenerator: undefined
-});
+const transport = new StreamableHTTPServerTransport();
 
 async function start() {
 
   await server.connect(transport);
 
+  // IMPORTANT: mount MCP route BEFORE any middleware
+  app.all("/mcp", (req, res) => {
+    transport.handleRequest(req, res);
+  });
+
+  // health route AFTER MCP route
   app.get("/health", (_req, res) => {
     res.json({ status: "ok" });
   });
 
-  app.all("/mcp", async (req, res) => {
-  await transport.handleRequest(req, res);
-});
-
-  const port = Number(process.env.PORT) || 3000;
+  const port = Number(process.env.PORT) || 8080;
 
   app.listen(port, () => {
     console.log(`Freshservice MCP server running on port ${port}`);
