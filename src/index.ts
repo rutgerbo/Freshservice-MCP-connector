@@ -48,12 +48,15 @@ async function start() {
   res.json({
     name: "freshservice-mcp",
     version: "1.0.0",
+    capabilities: {
+      tools: {}
+    },
     transport: {
       type: "streamable-http",
       endpoint: "/mcp"
     }
   });
-});
+  });
 
   // health route AFTER MCP route
   app.get("/health", (_req, res) => {
