@@ -17,19 +17,6 @@ import { registerConfigureInstanceTool } from "./tools/configureInstance.js";
 
 const app = express();
 
-/**
- * REQUIRED: CORS for Claude Web connector handshake
- */
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "*");
-  res.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-  next();
-});
-
-app.options("/.well-known/mcp", (_req, res) => res.sendStatus(200));
-app.options("/mcp", (_req, res) => res.sendStatus(200));;
-
 const server = new McpServer({
   name: "freshservice-mcp",
   version: "1.0.0"
@@ -52,16 +39,12 @@ async function start() {
 
   await server.connect(transport);
 
-  /**
-   * MCP transport endpoint
-   */
+  // MUST be first route
   app.all("/mcp", (req, res) => {
     transport.handleRequest(req, res);
   });
 
-  /**
-   * MCP discovery endpoint (required by Claude Web)
-   */
+  // discovery endpoint
   app.get("/.well-known/mcp", (_req, res) => {
     res.json({
       name: "freshservice-mcp",
@@ -76,9 +59,17 @@ async function start() {
     });
   });
 
-  /**
-   * Health check endpoint
-   */
+  // CORS headers AFTER MCP mount
+  app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "*");
+    res.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+    next();
+  });
+
+  app.options("/mcp", (_req, res) => res.sendStatus(200));
+  app.options("/.well-known/mcp", (_req, res) => res.sendStatus(200));
+
   app.get("/health", (_req, res) => {
     res.json({ status: "ok" });
   });
