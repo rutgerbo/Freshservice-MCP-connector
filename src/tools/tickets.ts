@@ -1,6 +1,5 @@
 import { z } from "zod";
-
-import { client } from "../freshserviceClient.js";
+import { getClient } from "../freshserviceClient.js";
 import { mcpResponse } from "../response.js";
 import { fetchAllPages } from "../pagination.js";
 
@@ -14,7 +13,7 @@ export function registerTicketTools(server: any) {
     },
     async ({ page, per_page }: any) => {
 
-      const res = await client.get("/tickets", {
+      const res = await getClient(ctx.sessionId).get("/tickets", {
         params: { page, per_page }
       });
 
@@ -29,7 +28,7 @@ export function registerTicketTools(server: any) {
     },
     async ({ ticket_id }: any) => {
 
-      const res = await client.get(`/tickets/${ticket_id}`);
+      const res = await getClient(ctx.sessionId).get(`/tickets/${ticket_id}`);
 
       return mcpResponse(res.data);
     }
@@ -40,7 +39,7 @@ export function registerTicketTools(server: any) {
     {},
     async () => {
 
-      const tickets = await fetchAllPages("/tickets");
+        const tickets = await fetchAllPages("/tickets", {}, ctx.sessionId);
 
       return mcpResponse({
         total: tickets.length,

@@ -1,33 +1,37 @@
-import { client } from "./freshserviceClient.js";
+import { getClient } from "./freshserviceClient.js";
 
 export async function fetchAllPages(
   endpoint: string,
-  params: Record<string, unknown> = {}
+  params: Record<string, unknown> = {},
+  sessionId: string
 ) {
   let page = 1;
   const per_page = 100;
-
   const results: any[] = [];
 
   while (true) {
-    const response = await client.get(endpoint, {
+    const response = await getClient(sessionId).get(endpoint, {
       params: {
         ...params,
         page,
-        per_page
-      }
+        per_page,
+      },
     });
 
-    const key = Object.keys(response.data)[0];
-    const batch = response.data[key];
+    const firstKey = Object.keys(response.data)[0];
+    const batch = response.data[firstKey];
 
-    if (!batch || batch.length === 0) break;
+    if (!Array.isArray(batch) || batch.length === 0) {
+      break;
+    }
 
     results.push(...batch);
 
-    if (batch.length < per_page) break;
+    if (batch.length < per_page) {
+      break;
+    }
 
-    page++;
+    page += 1;
   }
 
   return results;

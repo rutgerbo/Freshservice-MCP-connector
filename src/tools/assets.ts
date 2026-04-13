@@ -1,6 +1,5 @@
 import { z } from "zod";
-
-import { client } from "../freshserviceClient.js";
+import { getClient } from "../freshserviceClient.js";
 import { mcpResponse } from "../response.js";
 import { fetchAllPages } from "../pagination.js";
 
@@ -11,7 +10,7 @@ export function registerAssetTools(server: any) {
     {},
     async () => {
 
-      const assets = await fetchAllPages("/assets");
+      const assets = await fetchAllPages("/assets", {}, ctx.sessionId);
 
       return mcpResponse({
         total: assets.length,
@@ -27,7 +26,7 @@ export function registerAssetTools(server: any) {
     },
     async ({ asset_id }: any) => {
 
-      const res = await client.get(`/assets/${asset_id}`);
+      const res = await getClient(ctx.sessionId).get(`/assets/${asset_id}`);
 
       return mcpResponse(res.data);
     }

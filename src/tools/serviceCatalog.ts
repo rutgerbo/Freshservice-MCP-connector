@@ -1,6 +1,5 @@
 import { z } from "zod";
-
-import { client } from "../freshserviceClient.js";
+import { getClient } from "../freshserviceClient.js";
 import { mcpResponse } from "../response.js";
 
 export function registerServiceCatalogTools(server: any) {
@@ -10,7 +9,7 @@ export function registerServiceCatalogTools(server: any) {
     {},
     async () => {
 
-      const res = await client.get("/service_catalog/items");
+      const res = await getClient(ctx.sessionId).get("/service_catalog/items");
 
       return mcpResponse(res.data);
     }
@@ -23,7 +22,7 @@ export function registerServiceCatalogTools(server: any) {
     },
     async ({ request_id }: any) => {
 
-      const res = await client.get(`/service_requests/${request_id}`);
+      const res = await getClient(ctx.sessionId).get(`/service_requests/${request_id}`);
 
       return mcpResponse(res.data);
     }

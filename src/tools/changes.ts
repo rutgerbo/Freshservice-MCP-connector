@@ -1,6 +1,5 @@
 import { z } from "zod";
-
-import { client } from "../freshserviceClient.js";
+import { getClient } from "../freshserviceClient.js";
 import { mcpResponse } from "../response.js";
 import { fetchAllPages } from "../pagination.js";
 
@@ -14,7 +13,7 @@ export function registerChangeTools(server: any) {
     },
     async ({ page, per_page }: any) => {
 
-      const res = await client.get("/changes", {
+      const res = await getClient(ctx.sessionId).get("/changes", {
         params: { page, per_page }
       });
 
@@ -27,7 +26,7 @@ export function registerChangeTools(server: any) {
     {},
     async () => {
 
-      const changes = await fetchAllPages("/changes");
+      const changes = await fetchAllPages("/changes", {}, ctx.sessionId);
 
       return mcpResponse({
         total: changes.length,

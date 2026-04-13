@@ -1,7 +1,8 @@
 import "dotenv/config";
+import express from "express";
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { HttpServerTransport } from "@modelcontextprotocol/sdk/server/http.js";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 
 import { registerTicketTools } from "./tools/tickets.js";
 import { registerProblemTools } from "./tools/problems.js";
@@ -16,7 +17,7 @@ import { registerConfigureInstanceTool } from "./tools/configureInstance.js";
 
 const server = new McpServer({
   name: "freshservice-mcp",
-  version: "1.0.0"
+  version: "1.0.0",
 });
 
 registerTicketTools(server);
@@ -30,15 +31,28 @@ registerSearchTools(server);
 registerSyncTools(server);
 registerConfigureInstanceTool(server);
 
-async function startServer() {
-  const transport = new HttpServerTransport({
-    port: Number(process.env.PORT) || 3000,
-    endpoint: "/mcp"
+const app = express();
+app.use(express.json());
+
+app.get("/health", (_req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
+app.all("/mcp", async (req, res) => {
+  const transport = new StreamableHTTPServerTransport({
+    sessionIdGenerator: undefined,
+  });
+
+  res.on("close", () => {
+    transport.close();
   });
 
   await server.connect(transport);
+  await transport.handleRequest(req, res, req.body);
+});
 
-  console.log("Freshservice MCP server running");
-}
+const port = Number(process.env.PORT) || 3000;
 
-startServer();
+app.listen(port, () => {
+  console.log(`Freshservice MCP server listening on port ${port}`);
+});

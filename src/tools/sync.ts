@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { client } from "../freshserviceClient.js";
+import { getClient } from "../freshserviceClient.js";
 import { mcpResponse } from "../response.js";
 
 export function registerSyncTools(server: any) {
@@ -11,7 +11,7 @@ export function registerSyncTools(server: any) {
     },
     async ({ updated_since }: any) => {
 
-      const res = await client.get("/tickets", {
+      const res = await getClient(ctx.sessionId).get("/tickets", {
         params: { updated_since }
       });
 

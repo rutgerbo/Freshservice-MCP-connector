@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { client } from "../freshserviceClient.js";
+import { getClient } from "../freshserviceClient.js";
 import { mcpResponse } from "../response.js";
 import { fetchAllPages } from "../pagination.js";
 
@@ -12,7 +12,7 @@ export function registerSearchTools(server: any) {
     },
     async ({ query }: any) => {
 
-      const results = await fetchAllPages("/search/tickets", { query });
+      const results = await fetchAllPages("/search//tickets", {}, ctx.sessionId);
 
       return mcpResponse({
         total: results.length,
