@@ -43,6 +43,17 @@ async function start() {
   app.all("/mcp", (req, res) => {
     transport.handleRequest(req, res);
   });
+  
+  app.get("/.well-known/mcp", (_req, res) => {
+  res.json({
+    name: "freshservice-mcp",
+    version: "1.0.0",
+    transport: {
+      type: "streamable-http",
+      endpoint: "/mcp"
+    }
+  });
+});
 
   // health route AFTER MCP route
   app.get("/health", (_req, res) => {
