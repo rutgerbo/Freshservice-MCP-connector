@@ -17,9 +17,6 @@ import { registerConfigureInstanceTool } from "./tools/configureInstance.js";
 
 const app = express();
 
-app.use(express.raw({ type: "*/*" }));
-app.use(express.json());
-
 const server = new McpServer({
   name: "freshservice-mcp",
   version: "1.0.0"
@@ -49,8 +46,8 @@ async function start() {
   });
 
   app.all("/mcp", async (req, res) => {
-  await transport.handleRequest(req, res, req.body);
-  });
+  await transport.handleRequest(req, res);
+});
 
   const port = Number(process.env.PORT) || 3000;
 
