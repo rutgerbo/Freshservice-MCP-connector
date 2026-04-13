@@ -1,0 +1,37 @@
+{
+  "name": "freshservice-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for Freshservice API v2, designed for Claude Desktop on Windows.",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "freshservice-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "check": "tsc --noEmit -p tsconfig.json"
+  },
+  "keywords": [
+    "mcp",
+    "freshservice",
+    "claude-desktop",
+    "freshworks",
+    "itsm"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.5",
+    "axios": "^1.6.8",
+    "dotenv": "^16.4.5",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.8.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
