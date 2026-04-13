@@ -1,7 +1,7 @@
 import "dotenv/config";
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-#import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { HttpServerTransport } from "@modelcontextprotocol/sdk/server/http.js";
 
 import { registerTicketTools } from "./tools/tickets.js";
 import { registerProblemTools } from "./tools/problems.js";
@@ -13,7 +13,6 @@ import { registerRelationshipTools } from "./tools/relationships.js";
 import { registerSearchTools } from "./tools/search.js";
 import { registerSyncTools } from "./tools/sync.js";
 import { registerConfigureInstanceTool } from "./tools/configureInstance.js";
-import { HttpServerTransport } from "@modelcontextprotocol/sdk/server/http.js";
 
 const server = new McpServer({
   name: "freshservice-mcp",
@@ -31,16 +30,15 @@ registerSearchTools(server);
 registerSyncTools(server);
 registerConfigureInstanceTool(server);
 
-#async function main() {
-#  const transport = new StdioServerTransport();
-#  await server.connect(transport);
-#}
+async function startServer() {
+  const transport = new HttpServerTransport({
+    port: Number(process.env.PORT) || 3000,
+    endpoint: "/mcp"
+  });
 
-const transport = new HttpServerTransport({
-  port: process.env.PORT || 3000,
-  endpoint: "/mcp"
-});
+  await server.connect(transport);
 
-await server.connect(transport);
+  console.log("Freshservice MCP server running");
+}
 
-main();
+startServer();
