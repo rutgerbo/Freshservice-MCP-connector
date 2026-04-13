@@ -48,12 +48,8 @@ async function start() {
     res.json({ status: "ok" });
   });
 
-  app.post("/mcp", async (req, res) => {
-    await transport.handleRequest(req, res, req.body);
-  });
-
-  app.get("/mcp", (_req, res) => {
-    res.status(405).send("Method Not Allowed");
+  app.all("/mcp", async (req, res) => {
+  await transport.handleRequest(req, res, req.body);
   });
 
   const port = Number(process.env.PORT) || 3000;
