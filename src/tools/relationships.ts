@@ -10,12 +10,17 @@ export function registerRelationshipTools(server: any) {
       ticket_id: z.number(),
       problem_id: z.number()
     },
-    async ({ ticket_id, problem_id }: any) => {
-      const res = await client.put(`/tickets/${ticket_id}`, {
-        ticket: { problem_id }
-      });
+    async ({ ticket_id, problem_id }: any, ctx: any) => {
+
+      const res = await getClient(ctx.sessionId).put(
+        `/tickets/${ticket_id}`,
+        {
+          ticket: { problem_id }
+        }
+      );
 
       return mcpResponse(res.data);
+
     }
   );
 

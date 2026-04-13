@@ -9,13 +9,14 @@ export function registerSyncTools(server: any) {
     {
       updated_since: z.string()
     },
-    async ({ updated_since }: any) => {
+    async ({ updated_since }: any, ctx: any) => {
 
       const res = await getClient(ctx.sessionId).get("/tickets", {
         params: { updated_since }
       });
 
       return mcpResponse(res.data);
+
     }
   );
 

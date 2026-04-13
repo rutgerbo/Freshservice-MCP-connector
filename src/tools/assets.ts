@@ -8,27 +8,35 @@ export function registerAssetTools(server: any) {
   server.tool(
     "list_assets",
     {},
-    async () => {
+    async (_: any, ctx: any) => {
 
-      const assets = await fetchAllPages("/assets", {}, ctx.sessionId);
+      const assets = await fetchAllPages(
+        "/assets",
+        {},
+        ctx.sessionId
+      );
 
       return mcpResponse({
         total: assets.length,
         assets
       });
+
     }
   );
+
 
   server.tool(
     "get_asset",
     {
       asset_id: z.number()
     },
-    async ({ asset_id }: any) => {
+    async ({ asset_id }: any, ctx: any) => {
 
-      const res = await getClient(ctx.sessionId).get(`/assets/${asset_id}`);
+      const res = await getClient(ctx.sessionId)
+        .get(`/assets/${asset_id}`);
 
       return mcpResponse(res.data);
+
     }
   );
 

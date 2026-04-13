@@ -11,27 +11,37 @@ export function registerProblemTools(server: any) {
       page: z.number().optional(),
       per_page: z.number().optional()
     },
-    async ({ page, per_page }: any) => {
+    async ({ page, per_page }: any, ctx: any) => {
 
-      const res = await client.get("/problems", {
-        params: { page, per_page }
-      });
+      const res = await getClient(ctx.sessionId).get(
+        "/problems",
+        {
+          params: { page, per_page }
+        }
+      );
 
       return mcpResponse(res.data);
+
     }
   );
+
 
   server.tool(
     "list_all_problems",
     {},
-    async () => {
+    async (_: any, ctx: any) => {
 
-      const problems = await fetchAllPages("/problems");
+      const problems = await fetchAllPages(
+        "/problems",
+        {},
+        ctx.sessionId
+      );
 
       return mcpResponse({
         total: problems.length,
         problems
       });
+
     }
   );
 

@@ -10,14 +10,19 @@ export function registerSearchTools(server: any) {
     {
       query: z.string()
     },
-    async ({ query }: any) => {
+    async ({ query }: any, ctx: any) => {
 
-      const results = await fetchAllPages("/search//tickets", {}, ctx.sessionId);
+      const results = await fetchAllPages(
+        "/search/tickets",
+        { query },
+        ctx.sessionId
+      );
 
       return mcpResponse({
         total: results.length,
         results
       });
+
     }
   );
 

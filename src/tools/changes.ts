@@ -11,27 +11,37 @@ export function registerChangeTools(server: any) {
       page: z.number().optional(),
       per_page: z.number().optional()
     },
-    async ({ page, per_page }: any) => {
+    async ({ page, per_page }: any, ctx: any) => {
 
-      const res = await getClient(ctx.sessionId).get("/changes", {
-        params: { page, per_page }
-      });
+      const res = await getClient(ctx.sessionId).get(
+        "/changes",
+        {
+          params: { page, per_page }
+        }
+      );
 
       return mcpResponse(res.data);
+
     }
   );
+
 
   server.tool(
     "list_all_changes",
     {},
-    async () => {
+    async (_: any, ctx: any) => {
 
-      const changes = await fetchAllPages("/changes", {}, ctx.sessionId);
+      const changes = await fetchAllPages(
+        "/changes",
+        {},
+        ctx.sessionId
+      );
 
       return mcpResponse({
         total: changes.length,
         changes
       });
+
     }
   );
 

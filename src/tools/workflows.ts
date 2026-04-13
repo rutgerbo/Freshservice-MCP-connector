@@ -12,18 +12,24 @@ export function registerWorkflowTools(server: any) {
       ticket_id: z.number(),
       agent_id: z.number()
     },
-    async ({ ticket_id, agent_id }: any) => {
+    async ({ ticket_id, agent_id }: any, ctx: any) => {
       try {
-        const res = await client.put(`/tickets/${ticket_id}`, {
-          ticket: { responder_id: agent_id }
-        });
+
+        const res = await getClient(ctx.sessionId).put(
+          `/tickets/${ticket_id}`,
+          {
+            ticket: { responder_id: agent_id }
+          }
+        );
 
         return mcpResponse(res.data);
+
       } catch (e) {
         return handleApiError(e);
       }
     }
   );
+
 
   // Add note
   server.tool(
@@ -32,18 +38,24 @@ export function registerWorkflowTools(server: any) {
       ticket_id: z.number(),
       body: z.string()
     },
-    async ({ ticket_id, body }: any) => {
+    async ({ ticket_id, body }: any, ctx: any) => {
       try {
-        const res = await client.post(`/tickets/${ticket_id}/notes`, {
-          body
-        });
+
+        const res = await getClient(ctx.sessionId).post(
+          `/tickets/${ticket_id}/notes`,
+          {
+            body
+          }
+        );
 
         return mcpResponse(res.data);
+
       } catch (e) {
         return handleApiError(e);
       }
     }
   );
+
 
   // Resolve ticket
   server.tool(
@@ -51,13 +63,18 @@ export function registerWorkflowTools(server: any) {
     {
       ticket_id: z.number()
     },
-    async ({ ticket_id }: any) => {
+    async ({ ticket_id }: any, ctx: any) => {
       try {
-        const res = await client.put(`/tickets/${ticket_id}`, {
-          ticket: { status: 4 }
-        });
+
+        const res = await getClient(ctx.sessionId).put(
+          `/tickets/${ticket_id}`,
+          {
+            ticket: { status: 4 }
+          }
+        );
 
         return mcpResponse(res.data);
+
       } catch (e) {
         return handleApiError(e);
       }
