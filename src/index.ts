@@ -17,6 +17,18 @@ import { registerConfigureInstanceTool } from "./tools/configureInstance.js";
 
 const app = express();
 
+/**
+ * REQUIRED: CORS for Claude Web connector handshake
+ */
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "*");
+  res.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  next();
+});
+
+app.options("*", (_req, res) => res.sendStatus(200));
+
 const server = new McpServer({
   name: "freshservice-mcp",
   version: "1.0.0"
@@ -39,26 +51,33 @@ async function start() {
 
   await server.connect(transport);
 
-  // IMPORTANT: mount MCP route BEFORE any middleware
+  /**
+   * MCP transport endpoint
+   */
   app.all("/mcp", (req, res) => {
     transport.handleRequest(req, res);
   });
-  
+
+  /**
+   * MCP discovery endpoint (required by Claude Web)
+   */
   app.get("/.well-known/mcp", (_req, res) => {
-  res.json({
-    name: "freshservice-mcp",
-    version: "1.0.0",
-    capabilities: {
-      tools: {}
-    },
-    transport: {
-      type: "streamable-http",
-      endpoint: "/mcp"
-    }
-  });
+    res.json({
+      name: "freshservice-mcp",
+      version: "1.0.0",
+      capabilities: {
+        tools: {}
+      },
+      transport: {
+        type: "streamable-http",
+        endpoint: "/mcp"
+      }
+    });
   });
 
-  // health route AFTER MCP route
+  /**
+   * Health check endpoint
+   */
   app.get("/health", (_req, res) => {
     res.json({ status: "ok" });
   });
