@@ -16,7 +16,9 @@ import { registerSyncTools } from "./tools/sync.js";
 import { registerConfigureInstanceTool } from "./tools/configureInstance.js";
 
 const app = express();
+
 app.use(express.raw({ type: "*/*" }));
+app.use(express.json());
 
 const server = new McpServer({
   name: "freshservice-mcp",
