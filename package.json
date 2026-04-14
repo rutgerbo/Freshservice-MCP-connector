@@ -1,22 +1,21 @@
 {
   "name": "freshservice-mcp",
-  "version": "1.0.0",
-  "description": "",
+  "version": "2.0.0",
+  "description": "Full Freshservice API v2 MCP Server",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "build": "echo 'No build step required' && exit 0",
+    "start": "node index.js",
+    "dev": "node index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
     "axios": "^1.15.0",
-    "zod": "^4.3.6"
+    "express": "^4.18.2"
   },
-  "type": "module",
-  "bin": {
-    "freshservice-mcp": "./index.js"
-  }
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "ISC"
 }
