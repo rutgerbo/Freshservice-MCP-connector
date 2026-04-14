@@ -87,7 +87,7 @@ export function registerServiceCatalogTools(server: any) {
     },
     async ({ display_id, requested_for, quantity = 1, custom_fields }: any, ctx: any) => {
       try {
-        const body: Record<string, unknown> = { quantity, requested_for };
+        const body: Record<string, unknown> = { quantity, email: requested_for };
         if (custom_fields) body.custom_fields = custom_fields;
         const res = await getClient(ctx.sessionId).post(
           `/service_catalog/items/${display_id}/place_request`,
