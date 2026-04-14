@@ -47,7 +47,10 @@ export function registerServiceCatalogTools(server: any) {
     async ({ item_id }: any, ctx: any) => {
       try {
         const res = await getClient(ctx.sessionId).get(`/service_catalog/items/${item_id}`);
-        return mcpResponse(res.data);
+        // Freshservice wraps the response in a "service_item" key — unwrap it
+        // so downstream callers receive the item object directly.
+        const item = res.data?.service_item ?? res.data;
+        return mcpResponse(item);
       } catch (e) {
         return handleApiError(e);
       }
