@@ -9,12 +9,13 @@ export function registerGroupTools(server: any) {
     "list_groups",
     {
       page: z.number().optional(),
-      per_page: z.number().optional()
+      per_page: z.number().max(100).optional(),
+      workspace_id: z.number().optional()
     },
-    async ({ page, per_page }: any, ctx: any) => {
+    async ({ page, per_page, workspace_id }: any, ctx: any) => {
       try {
         const res = await getClient(ctx.sessionId).get("/groups", {
-          params: { page, per_page }
+          params: { page, per_page, workspace_id }
         });
         return mcpResponse(res.data);
       } catch (e) {
