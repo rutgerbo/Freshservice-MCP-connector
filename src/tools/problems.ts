@@ -127,4 +127,73 @@ export function registerProblemTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "list_problem_notes",
+    { problem_id: z.number(), page: z.number().optional(), per_page: z.number().optional() },
+    async ({ problem_id, page, per_page }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(`/problems/${problem_id}/notes`, {
+          params: { page, per_page }
+        });
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "get_problem_note",
+    { problem_id: z.number(), note_id: z.number() },
+    async ({ problem_id, note_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(`/problems/${problem_id}/notes/${note_id}`);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "create_problem_note",
+    {
+      problem_id: z.number(),
+      body: z.string(),
+      notify_emails: z.array(z.string()).optional()
+    },
+    async ({ problem_id, ...body }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post(`/problems/${problem_id}/notes`, body);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "update_problem_note",
+    { problem_id: z.number(), note_id: z.number(), body: z.string() },
+    async ({ problem_id, note_id, body }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(
+          `/problems/${problem_id}/notes/${note_id}`,
+          { body }
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "delete_problem_note",
+    { problem_id: z.number(), note_id: z.number() },
+    async ({ problem_id, note_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(`/problems/${problem_id}/notes/${note_id}`);
+        return mcpResponse({ success: true, message: `Note ${note_id} deleted.` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

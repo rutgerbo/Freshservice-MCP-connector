@@ -72,4 +72,107 @@ export function registerAgentTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "create_agent",
+    {
+      first_name: z.string(),
+      last_name: z.string().optional(),
+      email: z.string(),
+      job_title: z.string().optional(),
+      phone: z.string().optional(),
+      mobile_phone_number: z.string().optional(),
+      work_phone_number: z.string().optional(),
+      department_ids: z.array(z.number()).optional(),
+      location_id: z.number().optional(),
+      time_zone: z.string().optional(),
+      language: z.string().optional(),
+      role_ids: z.array(z.number()).optional(),
+      group_ids: z.array(z.number()).optional()
+    },
+    async (params: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post("/agents", params);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "update_agent",
+    {
+      agent_id: z.number(),
+      first_name: z.string().optional(),
+      last_name: z.string().optional(),
+      job_title: z.string().optional(),
+      phone: z.string().optional(),
+      mobile_phone_number: z.string().optional(),
+      work_phone_number: z.string().optional(),
+      department_ids: z.array(z.number()).optional(),
+      location_id: z.number().optional(),
+      time_zone: z.string().optional(),
+      language: z.string().optional(),
+      role_ids: z.array(z.number()).optional(),
+      group_ids: z.array(z.number()).optional()
+    },
+    async ({ agent_id, ...updates }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(`/agents/${agent_id}`, updates);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "delete_agent",
+    { agent_id: z.number() },
+    async ({ agent_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(`/agents/${agent_id}`);
+        return mcpResponse({ success: true, message: `Agent ${agent_id} deactivated.` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "reactivate_agent",
+    { agent_id: z.number() },
+    async ({ agent_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(`/agents/${agent_id}/reactivate`, {});
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "convert_agent_to_requester",
+    { agent_id: z.number() },
+    async ({ agent_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(
+          `/agents/${agent_id}/convert_to_requester`,
+          {}
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "forget_agent",
+    { agent_id: z.number() },
+    async ({ agent_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).put(`/agents/${agent_id}/forget`, {});
+        return mcpResponse({ success: true, message: `Agent ${agent_id} permanently deleted (GDPR).` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

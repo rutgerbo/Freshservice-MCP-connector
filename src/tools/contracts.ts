@@ -89,4 +89,82 @@ export function registerContractTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "delete_contract",
+    { contract_id: z.number() },
+    async ({ contract_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(`/contracts/${contract_id}`);
+        return mcpResponse({ success: true, message: `Contract ${contract_id} deleted.` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "submit_contract_for_approval",
+    { contract_id: z.number() },
+    async ({ contract_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post(
+          `/contracts/${contract_id}/submit_for_approval`,
+          {}
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "approve_contract",
+    { contract_id: z.number() },
+    async ({ contract_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post(`/contracts/${contract_id}/approve`, {});
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "reject_contract",
+    { contract_id: z.number(), remarks: z.string().optional() },
+    async ({ contract_id, remarks }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post(
+          `/contracts/${contract_id}/reject`,
+          remarks ? { remarks } : {}
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "list_contract_assets",
+    { contract_id: z.number() },
+    async ({ contract_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(`/contracts/${contract_id}/assets`);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "list_contract_types",
+    {},
+    async (_: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get("/contract_types");
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

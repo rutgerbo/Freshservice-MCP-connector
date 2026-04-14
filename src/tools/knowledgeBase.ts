@@ -170,4 +170,122 @@ export function registerKnowledgeBaseTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "search_solution_articles",
+    {
+      term: z.string(),
+      page: z.number().optional(),
+      per_page: z.number().optional()
+    },
+    async ({ term, page, per_page }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get("/solution_articles/search", {
+          params: { term, page, per_page }
+        });
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "publish_solution_article",
+    { article_id: z.number() },
+    async ({ article_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(
+          `/solution_articles/${article_id}`,
+          { status: 2 }
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "create_solution_category",
+    { name: z.string(), description: z.string().optional() },
+    async (params: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post("/solution_categories", params);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "update_solution_category",
+    { category_id: z.number(), name: z.string().optional(), description: z.string().optional() },
+    async ({ category_id, ...updates }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(
+          `/solution_categories/${category_id}`,
+          updates
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "delete_solution_category",
+    { category_id: z.number() },
+    async ({ category_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(`/solution_categories/${category_id}`);
+        return mcpResponse({ success: true, message: `Category ${category_id} deleted.` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "create_solution_folder",
+    {
+      name: z.string(),
+      category_id: z.number(),
+      visibility: z.number().optional(),
+      description: z.string().optional()
+    },
+    async (params: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post("/solution_folders", params);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "update_solution_folder",
+    {
+      folder_id: z.number(),
+      name: z.string().optional(),
+      visibility: z.number().optional(),
+      description: z.string().optional()
+    },
+    async ({ folder_id, ...updates }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(`/solution_folders/${folder_id}`, updates);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "delete_solution_folder",
+    { folder_id: z.number() },
+    async ({ folder_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(`/solution_folders/${folder_id}`);
+        return mcpResponse({ success: true, message: `Folder ${folder_id} deleted.` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

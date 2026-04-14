@@ -102,6 +102,24 @@ export function registerServiceCatalogTools(server: any) {
 
 
   server.tool(
+    "search_service_catalog_items",
+    {
+      query: z.string(),
+      page: z.number().optional(),
+      per_page: z.number().optional()
+    },
+    async ({ query, page, per_page }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get("/service_catalog/items", {
+          params: { search: query, page, per_page }
+        });
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
     "get_service_request",
     {
       request_id: z.number()

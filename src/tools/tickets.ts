@@ -225,4 +225,165 @@ export function registerTicketTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "restore_ticket",
+    { ticket_id: z.number() },
+    async ({ ticket_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(`/tickets/${ticket_id}/restore`, {});
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "update_ticket_conversation",
+    {
+      ticket_id: z.number(),
+      conversation_id: z.number(),
+      body: z.string()
+    },
+    async ({ ticket_id, conversation_id, body }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(
+          `/tickets/${ticket_id}/conversations/${conversation_id}`,
+          { body }
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "delete_ticket_conversation",
+    { ticket_id: z.number(), conversation_id: z.number() },
+    async ({ ticket_id, conversation_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(
+          `/tickets/${ticket_id}/conversations/${conversation_id}`
+        );
+        return mcpResponse({ success: true, message: `Conversation ${conversation_id} deleted.` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "get_ticket_csat",
+    { ticket_id: z.number() },
+    async ({ ticket_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(`/tickets/${ticket_id}/csat_response`);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "get_ticket_requested_items",
+    { ticket_id: z.number() },
+    async ({ ticket_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(`/tickets/${ticket_id}/requested_items`);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "update_ticket_requested_items",
+    {
+      ticket_id: z.number(),
+      requested_items: z.array(z.record(z.unknown()))
+    },
+    async ({ ticket_id, requested_items }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(
+          `/tickets/${ticket_id}/requested_items`,
+          { requested_items }
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "list_ticket_approvals",
+    { ticket_id: z.number() },
+    async ({ ticket_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(`/tickets/${ticket_id}/approvals`);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "get_ticket_approval",
+    { ticket_id: z.number(), approval_id: z.number() },
+    async ({ ticket_id, approval_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(
+          `/tickets/${ticket_id}/approvals/${approval_id}`
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "create_ticket_approval",
+    {
+      ticket_id: z.number(),
+      approver_id: z.number(),
+      approval_type: z.number().optional()
+    },
+    async ({ ticket_id, ...body }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post(
+          `/tickets/${ticket_id}/approvals`,
+          body
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "delete_ticket_approval",
+    { ticket_id: z.number(), approval_id: z.number() },
+    async ({ ticket_id, approval_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(
+          `/tickets/${ticket_id}/approvals/${approval_id}`
+        );
+        return mcpResponse({ success: true, message: `Approval ${approval_id} cancelled.` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "send_ticket_approval_reminder",
+    { ticket_id: z.number(), approval_id: z.number() },
+    async ({ ticket_id, approval_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post(
+          `/tickets/${ticket_id}/approvals/${approval_id}/reminders`,
+          {}
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

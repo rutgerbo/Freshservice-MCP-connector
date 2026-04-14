@@ -103,4 +103,59 @@ export function registerProjectTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "delete_project",
+    { project_id: z.number() },
+    async ({ project_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(`/projects/${project_id}`);
+        return mcpResponse({ success: true, message: `Project ${project_id} deleted.` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "archive_project",
+    { project_id: z.number() },
+    async ({ project_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(`/projects/${project_id}/archive`, {});
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "list_project_members",
+    { project_id: z.number() },
+    async ({ project_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(`/projects/${project_id}/members`);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "add_project_member",
+    {
+      project_id: z.number(),
+      agent_id: z.number(),
+      role: z.string().optional()
+    },
+    async ({ project_id, ...body }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post(
+          `/projects/${project_id}/members`,
+          body
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

@@ -90,4 +90,16 @@ export function registerVendorTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "delete_vendor",
+    { vendor_id: z.number() },
+    async ({ vendor_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(`/vendors/${vendor_id}`);
+        return mcpResponse({ success: true, message: `Vendor ${vendor_id} deleted.` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

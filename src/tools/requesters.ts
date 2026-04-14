@@ -108,4 +108,61 @@ export function registerRequesterTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "delete_requester",
+    { requester_id: z.number() },
+    async ({ requester_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(`/requesters/${requester_id}`);
+        return mcpResponse({ success: true, message: `Requester ${requester_id} deactivated.` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "forget_requester",
+    { requester_id: z.number() },
+    async ({ requester_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(`/requesters/${requester_id}/forget`);
+        return mcpResponse({ success: true, message: `Requester ${requester_id} permanently deleted (GDPR).` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "convert_requester_to_agent",
+    { requester_id: z.number() },
+    async ({ requester_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(
+          `/requesters/${requester_id}/convert_to_agent`,
+          {}
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "merge_requesters",
+    {
+      requester_id: z.number(),
+      secondary_requester_ids: z.array(z.number())
+    },
+    async ({ requester_id, secondary_requester_ids }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(
+          `/requesters/${requester_id}/merge`,
+          { secondary_requesters: secondary_requester_ids }
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

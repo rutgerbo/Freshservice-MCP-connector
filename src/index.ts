@@ -31,6 +31,19 @@ import { registerAnnouncementTools } from "./tools/announcements.js";
 import { registerProjectTools } from "./tools/projects.js";
 import { registerSlaAndHoursTools } from "./tools/slaAndHours.js";
 import { registerConfigureInstanceTool } from "./tools/configureInstance.js";
+import { registerPurchaseOrderTools } from "./tools/purchaseOrders.js";
+import { registerCustomObjectTools } from "./tools/customObjects.js";
+import { registerOnboardingTools } from "./tools/onboarding.js";
+import { registerAlertTools } from "./tools/alerts.js";
+import { registerCabTools } from "./tools/cabs.js";
+import { registerStatusPageTools } from "./tools/statusPage.js";
+import { registerOncallTools } from "./tools/oncall.js";
+import { registerCannedResponseTools } from "./tools/cannedResponses.js";
+import { registerAuditLogTools } from "./tools/auditLogs.js";
+import { registerWorkspaceTools } from "./tools/workspaces.js";
+import { registerPostIncidentReportTools } from "./tools/postIncidentReports.js";
+import { registerJourneyTools } from "./tools/journeys.js";
+import { registerDelegationTools } from "./tools/delegations.js";
 
 const app = express();
 
@@ -106,6 +119,29 @@ function createMcpServer(): McpServer {
   registerSearchTools(server);
   registerSyncTools(server);
   registerConfigureInstanceTool(server);
+
+  // Finance & Procurement
+  registerPurchaseOrderTools(server);
+
+  // Custom Data
+  registerCustomObjectTools(server);
+
+  // HR Workflows
+  registerOnboardingTools(server);
+  registerJourneyTools(server);
+  registerDelegationTools(server);
+
+  // Monitoring & Ops
+  registerAlertTools(server);
+  registerStatusPageTools(server);
+  registerOncallTools(server);
+  registerPostIncidentReportTools(server);
+  registerCabTools(server);
+
+  // Admin & Config
+  registerCannedResponseTools(server);
+  registerAuditLogTools(server);
+  registerWorkspaceTools(server);
 
   return server;
 }

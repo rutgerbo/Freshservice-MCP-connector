@@ -132,4 +132,95 @@ export function registerChangeTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "list_change_notes",
+    { change_id: z.number(), page: z.number().optional(), per_page: z.number().optional() },
+    async ({ change_id, page, per_page }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(`/changes/${change_id}/notes`, {
+          params: { page, per_page }
+        });
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "create_change_note",
+    { change_id: z.number(), body: z.string(), notify_emails: z.array(z.string()).optional() },
+    async ({ change_id, ...body }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post(`/changes/${change_id}/notes`, body);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "update_change_note",
+    { change_id: z.number(), note_id: z.number(), body: z.string() },
+    async ({ change_id, note_id, body }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(
+          `/changes/${change_id}/notes/${note_id}`,
+          { body }
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "delete_change_note",
+    { change_id: z.number(), note_id: z.number() },
+    async ({ change_id, note_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(`/changes/${change_id}/notes/${note_id}`);
+        return mcpResponse({ success: true, message: `Note ${note_id} deleted.` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "list_change_approvals",
+    { change_id: z.number() },
+    async ({ change_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(`/changes/${change_id}/approvals`);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "get_change_approval",
+    { change_id: z.number(), approval_id: z.number() },
+    async ({ change_id, approval_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(
+          `/changes/${change_id}/approvals/${approval_id}`
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "delete_change_approval",
+    { change_id: z.number(), approval_id: z.number() },
+    async ({ change_id, approval_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(`/changes/${change_id}/approvals/${approval_id}`);
+        return mcpResponse({ success: true, message: `Approval ${approval_id} cancelled.` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

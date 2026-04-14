@@ -80,4 +80,16 @@ export function registerDepartmentTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "delete_department",
+    { department_id: z.number() },
+    async ({ department_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(`/departments/${department_id}`);
+        return mcpResponse({ success: true, message: `Department ${department_id} deleted.` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

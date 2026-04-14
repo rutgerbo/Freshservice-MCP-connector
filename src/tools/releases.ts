@@ -129,4 +129,69 @@ export function registerReleaseTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "restore_release",
+    { release_id: z.number() },
+    async ({ release_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(`/releases/${release_id}/restore`, {});
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "list_release_notes",
+    { release_id: z.number(), page: z.number().optional(), per_page: z.number().optional() },
+    async ({ release_id, page, per_page }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(`/releases/${release_id}/notes`, {
+          params: { page, per_page }
+        });
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "create_release_note",
+    { release_id: z.number(), body: z.string(), notify_emails: z.array(z.string()).optional() },
+    async ({ release_id, ...body }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post(`/releases/${release_id}/notes`, body);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "update_release_note",
+    { release_id: z.number(), note_id: z.number(), body: z.string() },
+    async ({ release_id, note_id, body }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(
+          `/releases/${release_id}/notes/${note_id}`,
+          { body }
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "delete_release_note",
+    { release_id: z.number(), note_id: z.number() },
+    async ({ release_id, note_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(`/releases/${release_id}/notes/${note_id}`);
+        return mcpResponse({ success: true, message: `Note ${note_id} deleted.` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

@@ -81,4 +81,16 @@ export function registerProductTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "delete_product",
+    { product_id: z.number() },
+    async ({ product_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(`/products/${product_id}`);
+        return mcpResponse({ success: true, message: `Product ${product_id} deleted.` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

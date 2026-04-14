@@ -92,4 +92,16 @@ export function registerLocationTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "delete_location",
+    { location_id: z.number() },
+    async ({ location_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(`/locations/${location_id}`);
+        return mcpResponse({ success: true, message: `Location ${location_id} deleted.` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }
