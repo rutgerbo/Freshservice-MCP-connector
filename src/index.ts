@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express from "express";
+import crypto from "crypto";
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
@@ -14,9 +15,24 @@ import { registerRelationshipTools } from "./tools/relationships.js";
 import { registerSearchTools } from "./tools/search.js";
 import { registerSyncTools } from "./tools/sync.js";
 import { registerConfigureInstanceTool } from "./tools/configureInstance.js";
-import crypto from "crypto";
 
 const app = express();
+
+/*
+CORS MUST be before all routes
+*/
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "*");
+  res.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  next();
+});
+
+/*
+Preflight handlers
+*/
+app.options("/mcp", (_req, res) => res.sendStatus(200));
+app.options("/.well-known/mcp", (_req, res) => res.sendStatus(200));
 
 const server = new McpServer({
   name: "freshservice-mcp",
@@ -42,19 +58,21 @@ async function start() {
 
   await server.connect(transport);
 
-  // MUST be first route
-  app.all("/mcp", (req, res) => {
-    transport.handleRequest(req, res);
+  /*
+  MCP endpoint MUST be first runtime route
+  */
+  app.all("/mcp", async (req, res) => {
+    await transport.handleRequest(req, res);
   });
 
-  // discovery endpoint
+  /*
+  Discovery endpoint
+  */
   app.get("/.well-known/mcp", (_req, res) => {
     res.json({
       name: "freshservice-mcp",
       version: "1.0.0",
-      capabilities: {
-        tools: {}
-      },
+      capabilities: { tools: {} },
       transport: {
         type: "streamable-http",
         endpoint: "/mcp"
@@ -62,17 +80,9 @@ async function start() {
     });
   });
 
-  // CORS headers AFTER MCP mount
-  app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "*");
-    res.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-    next();
-  });
-
-  app.options("/mcp", (_req, res) => res.sendStatus(200));
-  app.options("/.well-known/mcp", (_req, res) => res.sendStatus(200));
-
+  /*
+  Health endpoint
+  */
   app.get("/health", (_req, res) => {
     res.json({ status: "ok" });
   });
