@@ -14,6 +14,7 @@ import { registerRelationshipTools } from "./tools/relationships.js";
 import { registerSearchTools } from "./tools/search.js";
 import { registerSyncTools } from "./tools/sync.js";
 import { registerConfigureInstanceTool } from "./tools/configureInstance.js";
+import crypto from "crypto";
 
 const app = express();
 
@@ -33,7 +34,9 @@ registerSearchTools(server);
 registerSyncTools(server);
 registerConfigureInstanceTool(server);
 
-const transport = new StreamableHTTPServerTransport();
+const transport = new StreamableHTTPServerTransport({
+  sessionIdGenerator: () => crypto.randomUUID()
+});
 
 async function start() {
 
