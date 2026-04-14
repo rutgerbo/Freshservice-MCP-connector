@@ -35,16 +35,20 @@ import { registerConfigureInstanceTool } from "./tools/configureInstance.js";
 const app = express();
 
 /*
-CORS — must be before all routes
+CORS — must be before all routes. OPTIONS is handled here directly
+so we never need a wildcard route (Express v5 / path-to-regexp v8
+does not accept bare "*").
 */
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "*");
   res.header("Access-Control-Allow-Methods", "GET,POST,DELETE,OPTIONS");
+  if (req.method === "OPTIONS") {
+    res.sendStatus(200);
+    return;
+  }
   next();
 });
-
-app.options("*", (_req, res) => res.sendStatus(200));
 
 /*
 Body parsing
