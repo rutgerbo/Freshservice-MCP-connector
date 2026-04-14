@@ -14,7 +14,7 @@ export function registerServiceCatalogTools(server: any) {
     },
     async ({ page, per_page }: any, ctx: any) => {
       try {
-        const res = await getClient(ctx.sessionId).get("/service_items", {
+        const res = await getClient(ctx.sessionId).get("/service_catalog/items", {
           params: { page, per_page }
         });
         return mcpResponse(res.data);
@@ -30,7 +30,7 @@ export function registerServiceCatalogTools(server: any) {
     {},
     async (_: any, ctx: any) => {
       try {
-        const items = await fetchAllPages("/service_items", {}, ctx.sessionId);
+        const items = await fetchAllPages("/service_catalog/items", {}, ctx.sessionId);
         return mcpResponse({ total: items.length, service_items: items });
       } catch (e) {
         return handleApiError(e);
@@ -46,7 +46,7 @@ export function registerServiceCatalogTools(server: any) {
     },
     async ({ item_id }: any, ctx: any) => {
       try {
-        const res = await getClient(ctx.sessionId).get(`/service_items/${item_id}`);
+        const res = await getClient(ctx.sessionId).get(`/service_catalog/items/${item_id}`);
         return mcpResponse(res.data);
       } catch (e) {
         return handleApiError(e);
@@ -63,7 +63,7 @@ export function registerServiceCatalogTools(server: any) {
     },
     async ({ page, per_page }: any, ctx: any) => {
       try {
-        const res = await getClient(ctx.sessionId).get("/service_categories", {
+        const res = await getClient(ctx.sessionId).get("/service_catalog/categories", {
           params: { page, per_page }
         });
         return mcpResponse(res.data);
