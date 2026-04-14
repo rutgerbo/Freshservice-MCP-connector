@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { getClient } from "../freshserviceClient.js";
 import { mcpResponse } from "../response.js";
+import { handleApiError } from "../errors.js";
 
 export function registerSyncTools(server: any) {
 
@@ -10,13 +11,17 @@ export function registerSyncTools(server: any) {
       updated_since: z.string()
     },
     async ({ updated_since }: any, ctx: any) => {
+      try {
 
-      const res = await getClient(ctx.sessionId).get("/tickets", {
-        params: { updated_since }
-      });
+        const res = await getClient(ctx.sessionId).get("/tickets", {
+          params: { updated_since }
+        });
 
-      return mcpResponse(res.data);
+        return mcpResponse(res.data);
 
+      } catch (e) {
+        return handleApiError(e);
+      }
     }
   );
 

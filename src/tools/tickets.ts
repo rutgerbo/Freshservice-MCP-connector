@@ -2,6 +2,7 @@ import { z } from "zod";
 import { getClient } from "../freshserviceClient.js";
 import { mcpResponse } from "../response.js";
 import { fetchAllPages } from "../pagination.js";
+import { handleApiError } from "../errors.js";
 
 export function registerTicketTools(server: any) {
 
@@ -12,16 +13,20 @@ export function registerTicketTools(server: any) {
       per_page: z.number().optional()
     },
     async ({ page, per_page }: any, ctx: any) => {
+      try {
 
-      const res = await getClient(ctx.sessionId).get(
-        "/tickets",
-        {
-          params: { page, per_page }
-        }
-      );
+        const res = await getClient(ctx.sessionId).get(
+          "/tickets",
+          {
+            params: { page, per_page }
+          }
+        );
 
-      return mcpResponse(res.data);
+        return mcpResponse(res.data);
 
+      } catch (e) {
+        return handleApiError(e);
+      }
     }
   );
 
@@ -32,13 +37,17 @@ export function registerTicketTools(server: any) {
       ticket_id: z.number()
     },
     async ({ ticket_id }: any, ctx: any) => {
+      try {
 
-      const res = await getClient(ctx.sessionId).get(
-        `/tickets/${ticket_id}`
-      );
+        const res = await getClient(ctx.sessionId).get(
+          `/tickets/${ticket_id}`
+        );
 
-      return mcpResponse(res.data);
+        return mcpResponse(res.data);
 
+      } catch (e) {
+        return handleApiError(e);
+      }
     }
   );
 
@@ -47,18 +56,22 @@ export function registerTicketTools(server: any) {
     "list_all_tickets",
     {},
     async (_: any, ctx: any) => {
+      try {
 
-      const tickets = await fetchAllPages(
-        "/tickets",
-        {},
-        ctx.sessionId
-      );
+        const tickets = await fetchAllPages(
+          "/tickets",
+          {},
+          ctx.sessionId
+        );
 
-      return mcpResponse({
-        total: tickets.length,
-        tickets
-      });
+        return mcpResponse({
+          total: tickets.length,
+          tickets
+        });
 
+      } catch (e) {
+        return handleApiError(e);
+      }
     }
   );
 

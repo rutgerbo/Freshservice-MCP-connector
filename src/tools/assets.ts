@@ -2,6 +2,7 @@ import { z } from "zod";
 import { getClient } from "../freshserviceClient.js";
 import { mcpResponse } from "../response.js";
 import { fetchAllPages } from "../pagination.js";
+import { handleApiError } from "../errors.js";
 
 export function registerAssetTools(server: any) {
 
@@ -9,18 +10,22 @@ export function registerAssetTools(server: any) {
     "list_assets",
     {},
     async (_: any, ctx: any) => {
+      try {
 
-      const assets = await fetchAllPages(
-        "/assets",
-        {},
-        ctx.sessionId
-      );
+        const assets = await fetchAllPages(
+          "/assets",
+          {},
+          ctx.sessionId
+        );
 
-      return mcpResponse({
-        total: assets.length,
-        assets
-      });
+        return mcpResponse({
+          total: assets.length,
+          assets
+        });
 
+      } catch (e) {
+        return handleApiError(e);
+      }
     }
   );
 
@@ -31,12 +36,16 @@ export function registerAssetTools(server: any) {
       asset_id: z.number()
     },
     async ({ asset_id }: any, ctx: any) => {
+      try {
 
-      const res = await getClient(ctx.sessionId)
-        .get(`/assets/${asset_id}`);
+        const res = await getClient(ctx.sessionId)
+          .get(`/assets/${asset_id}`);
 
-      return mcpResponse(res.data);
+        return mcpResponse(res.data);
 
+      } catch (e) {
+        return handleApiError(e);
+      }
     }
   );
 

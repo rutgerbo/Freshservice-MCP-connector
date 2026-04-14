@@ -2,6 +2,7 @@ import { z } from "zod";
 import { getClient } from "../freshserviceClient.js";
 import { mcpResponse } from "../response.js";
 import { fetchAllPages } from "../pagination.js";
+import { handleApiError } from "../errors.js";
 
 export function registerSearchTools(server: any) {
 
@@ -11,18 +12,22 @@ export function registerSearchTools(server: any) {
       query: z.string()
     },
     async ({ query }: any, ctx: any) => {
+      try {
 
-      const results = await fetchAllPages(
-        "/search/tickets",
-        { query },
-        ctx.sessionId
-      );
+        const results = await fetchAllPages(
+          "/search/tickets",
+          { query },
+          ctx.sessionId
+        );
 
-      return mcpResponse({
-        total: results.length,
-        results
-      });
+        return mcpResponse({
+          total: results.length,
+          results
+        });
 
+      } catch (e) {
+        return handleApiError(e);
+      }
     }
   );
 

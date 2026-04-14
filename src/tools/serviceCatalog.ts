@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { getClient } from "../freshserviceClient.js";
 import { mcpResponse } from "../response.js";
+import { handleApiError } from "../errors.js";
 
 export function registerServiceCatalogTools(server: any) {
 
@@ -8,12 +9,16 @@ export function registerServiceCatalogTools(server: any) {
     "list_service_catalog_items",
     {},
     async (_: any, ctx: any) => {
+      try {
 
-      const res = await getClient(ctx.sessionId)
-        .get("/service_catalog/items");
+        const res = await getClient(ctx.sessionId)
+          .get("/service_catalog/items");
 
-      return mcpResponse(res.data);
+        return mcpResponse(res.data);
 
+      } catch (e) {
+        return handleApiError(e);
+      }
     }
   );
 
@@ -24,12 +29,16 @@ export function registerServiceCatalogTools(server: any) {
       request_id: z.number()
     },
     async ({ request_id }: any, ctx: any) => {
+      try {
 
-      const res = await getClient(ctx.sessionId)
-        .get(`/service_requests/${request_id}`);
+        const res = await getClient(ctx.sessionId)
+          .get(`/service_requests/${request_id}`);
 
-      return mcpResponse(res.data);
+        return mcpResponse(res.data);
 
+      } catch (e) {
+        return handleApiError(e);
+      }
     }
   );
 
