@@ -4,10 +4,10 @@ import { mcpResponse } from "../response.js";
 import { fetchAllPages } from "../pagination.js";
 import { handleApiError } from "../errors.js";
 
-export function registerProblemTools(server: any) {
+export function registerReleaseTools(server: any) {
 
   server.tool(
-    "list_problems",
+    "list_releases",
     {
       page: z.number().optional(),
       per_page: z.number().optional(),
@@ -15,7 +15,7 @@ export function registerProblemTools(server: any) {
     },
     async ({ page, per_page, order_type }: any, ctx: any) => {
       try {
-        const res = await getClient(ctx.sessionId).get("/problems", {
+        const res = await getClient(ctx.sessionId).get("/releases", {
           params: { page, per_page, order_type }
         });
         return mcpResponse(res.data);
@@ -27,12 +27,12 @@ export function registerProblemTools(server: any) {
 
 
   server.tool(
-    "list_all_problems",
+    "list_all_releases",
     {},
     async (_: any, ctx: any) => {
       try {
-        const problems = await fetchAllPages("/problems", {}, ctx.sessionId);
-        return mcpResponse({ total: problems.length, problems });
+        const releases = await fetchAllPages("/releases", {}, ctx.sessionId);
+        return mcpResponse({ total: releases.length, releases });
       } catch (e) {
         return handleApiError(e);
       }
@@ -41,13 +41,13 @@ export function registerProblemTools(server: any) {
 
 
   server.tool(
-    "get_problem",
+    "get_release",
     {
-      problem_id: z.number()
+      release_id: z.number()
     },
-    async ({ problem_id }: any, ctx: any) => {
+    async ({ release_id }: any, ctx: any) => {
       try {
-        const res = await getClient(ctx.sessionId).get(`/problems/${problem_id}`);
+        const res = await getClient(ctx.sessionId).get(`/releases/${release_id}`);
         return mcpResponse(res.data);
       } catch (e) {
         return handleApiError(e);
@@ -57,26 +57,26 @@ export function registerProblemTools(server: any) {
 
 
   server.tool(
-    "create_problem",
+    "create_release",
     {
       subject: z.string(),
       description: z.string().optional(),
-      email: z.string().optional(),
-      requester_id: z.number().optional(),
+      release_type: z.number().optional(),
       status: z.number().optional(),
       priority: z.number().optional(),
-      impact: z.number().optional(),
+      planned_start_date: z.string().optional(),
+      planned_end_date: z.string().optional(),
+      work_start_date: z.string().optional(),
+      work_end_date: z.string().optional(),
       group_id: z.number().optional(),
       agent_id: z.number().optional(),
       category: z.string().optional(),
       sub_category: z.string().optional(),
-      item_category: z.string().optional(),
-      department_id: z.number().optional(),
-      due_by: z.string().optional()
+      department_id: z.number().optional()
     },
     async (params: any, ctx: any) => {
       try {
-        const res = await getClient(ctx.sessionId).post("/problems", params);
+        const res = await getClient(ctx.sessionId).post("/releases", params);
         return mcpResponse(res.data);
       } catch (e) {
         return handleApiError(e);
@@ -86,24 +86,26 @@ export function registerProblemTools(server: any) {
 
 
   server.tool(
-    "update_problem",
+    "update_release",
     {
-      problem_id: z.number(),
+      release_id: z.number(),
       subject: z.string().optional(),
       description: z.string().optional(),
+      release_type: z.number().optional(),
       status: z.number().optional(),
       priority: z.number().optional(),
-      impact: z.number().optional(),
+      planned_start_date: z.string().optional(),
+      planned_end_date: z.string().optional(),
+      work_start_date: z.string().optional(),
+      work_end_date: z.string().optional(),
       group_id: z.number().optional(),
       agent_id: z.number().optional(),
       category: z.string().optional(),
-      sub_category: z.string().optional(),
-      item_category: z.string().optional(),
-      due_by: z.string().optional()
+      sub_category: z.string().optional()
     },
-    async ({ problem_id, ...updates }: any, ctx: any) => {
+    async ({ release_id, ...updates }: any, ctx: any) => {
       try {
-        const res = await getClient(ctx.sessionId).put(`/problems/${problem_id}`, updates);
+        const res = await getClient(ctx.sessionId).put(`/releases/${release_id}`, updates);
         return mcpResponse(res.data);
       } catch (e) {
         return handleApiError(e);
@@ -113,14 +115,14 @@ export function registerProblemTools(server: any) {
 
 
   server.tool(
-    "delete_problem",
+    "delete_release",
     {
-      problem_id: z.number()
+      release_id: z.number()
     },
-    async ({ problem_id }: any, ctx: any) => {
+    async ({ release_id }: any, ctx: any) => {
       try {
-        await getClient(ctx.sessionId).delete(`/problems/${problem_id}`);
-        return mcpResponse({ success: true, message: `Problem ${problem_id} deleted.` });
+        await getClient(ctx.sessionId).delete(`/releases/${release_id}`);
+        return mcpResponse({ success: true, message: `Release ${release_id} deleted.` });
       } catch (e) {
         return handleApiError(e);
       }

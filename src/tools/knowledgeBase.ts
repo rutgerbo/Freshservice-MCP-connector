@@ -1,0 +1,164 @@
+import { z } from "zod";
+import { getClient } from "../freshserviceClient.js";
+import { mcpResponse } from "../response.js";
+import { handleApiError } from "../errors.js";
+
+export function registerKnowledgeBaseTools(server: any) {
+
+  server.tool(
+    "list_solution_categories",
+    {},
+    async (_: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get("/solution_categories");
+        return mcpResponse(res.data);
+      } catch (e) {
+        return handleApiError(e);
+      }
+    }
+  );
+
+
+  server.tool(
+    "get_solution_category",
+    {
+      category_id: z.number()
+    },
+    async ({ category_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(`/solution_categories/${category_id}`);
+        return mcpResponse(res.data);
+      } catch (e) {
+        return handleApiError(e);
+      }
+    }
+  );
+
+
+  server.tool(
+    "list_solution_folders",
+    {
+      category_id: z.number()
+    },
+    async ({ category_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(`/solution_categories/${category_id}/folders`);
+        return mcpResponse(res.data);
+      } catch (e) {
+        return handleApiError(e);
+      }
+    }
+  );
+
+
+  server.tool(
+    "get_solution_folder",
+    {
+      folder_id: z.number()
+    },
+    async ({ folder_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(`/solution_folders/${folder_id}`);
+        return mcpResponse(res.data);
+      } catch (e) {
+        return handleApiError(e);
+      }
+    }
+  );
+
+
+  server.tool(
+    "list_solution_articles",
+    {
+      folder_id: z.number(),
+      page: z.number().optional(),
+      per_page: z.number().optional()
+    },
+    async ({ folder_id, page, per_page }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(
+          `/solution_folders/${folder_id}/articles`,
+          { params: { page, per_page } }
+        );
+        return mcpResponse(res.data);
+      } catch (e) {
+        return handleApiError(e);
+      }
+    }
+  );
+
+
+  server.tool(
+    "get_solution_article",
+    {
+      article_id: z.number()
+    },
+    async ({ article_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(`/solution_articles/${article_id}`);
+        return mcpResponse(res.data);
+      } catch (e) {
+        return handleApiError(e);
+      }
+    }
+  );
+
+
+  server.tool(
+    "create_solution_article",
+    {
+      title: z.string(),
+      description: z.string(),
+      folder_id: z.number(),
+      status: z.number().optional(),
+      tags: z.array(z.string()).optional(),
+      keywords: z.array(z.string()).optional()
+    },
+    async (params: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post("/solution_articles", params);
+        return mcpResponse(res.data);
+      } catch (e) {
+        return handleApiError(e);
+      }
+    }
+  );
+
+
+  server.tool(
+    "update_solution_article",
+    {
+      article_id: z.number(),
+      title: z.string().optional(),
+      description: z.string().optional(),
+      status: z.number().optional(),
+      tags: z.array(z.string()).optional(),
+      keywords: z.array(z.string()).optional()
+    },
+    async ({ article_id, ...updates }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(`/solution_articles/${article_id}`, updates);
+        return mcpResponse(res.data);
+      } catch (e) {
+        return handleApiError(e);
+      }
+    }
+  );
+
+
+  server.tool(
+    "delete_solution_article",
+    {
+      article_id: z.number()
+    },
+    async ({ article_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(`/solution_articles/${article_id}`);
+        return mcpResponse({ success: true, message: `Article ${article_id} deleted.` });
+      } catch (e) {
+        return handleApiError(e);
+      }
+    }
+  );
+
+}
