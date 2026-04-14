@@ -11,11 +11,15 @@ export function registerTimeEntryTools(server: any) {
     "list_time_entries",
     {
       parent_type: parentTypeSchema,
-      parent_id: z.number()
+      parent_id: z.number(),
+      page: z.number().optional(),
+      per_page: z.number().max(100).optional()
     },
-    async ({ parent_type, parent_id }: any, ctx: any) => {
+    async ({ parent_type, parent_id, page, per_page }: any, ctx: any) => {
       try {
-        const res = await getClient(ctx.sessionId).get(`/${parent_type}/${parent_id}/time_entries`);
+        const res = await getClient(ctx.sessionId).get(`/${parent_type}/${parent_id}/time_entries`, {
+          params: { page, per_page }
+        });
         return mcpResponse(res.data);
       } catch (e) {
         return handleApiError(e);

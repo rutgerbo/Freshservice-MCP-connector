@@ -7,10 +7,15 @@ export function registerSlaAndHoursTools(server: any) {
 
   server.tool(
     "list_sla_policies",
-    {},
-    async (_: any, ctx: any) => {
+    {
+      page: z.number().optional(),
+      per_page: z.number().max(100).optional()
+    },
+    async ({ page, per_page }: any, ctx: any) => {
       try {
-        const res = await getClient(ctx.sessionId).get("/sla_policies");
+        const res = await getClient(ctx.sessionId).get("/sla_policies", {
+          params: { page, per_page }
+        });
         return mcpResponse(res.data);
       } catch (e) {
         return handleApiError(e);
@@ -21,10 +26,15 @@ export function registerSlaAndHoursTools(server: any) {
 
   server.tool(
     "list_business_hours",
-    {},
-    async (_: any, ctx: any) => {
+    {
+      page: z.number().optional(),
+      per_page: z.number().max(100).optional()
+    },
+    async ({ page, per_page }: any, ctx: any) => {
       try {
-        const res = await getClient(ctx.sessionId).get("/business_hours");
+        const res = await getClient(ctx.sessionId).get("/business_hours", {
+          params: { page, per_page }
+        });
         return mcpResponse(res.data);
       } catch (e) {
         return handleApiError(e);
@@ -51,10 +61,15 @@ export function registerSlaAndHoursTools(server: any) {
 
   server.tool(
     "list_agent_roles",
-    {},
-    async (_: any, ctx: any) => {
+    {
+      page: z.number().optional(),
+      per_page: z.number().max(100).optional()
+    },
+    async ({ page, per_page }: any, ctx: any) => {
       try {
-        const res = await getClient(ctx.sessionId).get("/roles");
+        const res = await getClient(ctx.sessionId).get("/roles", {
+          params: { page, per_page }
+        });
         return mcpResponse(res.data);
       } catch (e) {
         return handleApiError(e);

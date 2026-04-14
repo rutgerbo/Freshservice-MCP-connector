@@ -149,11 +149,15 @@ export function registerTicketTools(server: any) {
   server.tool(
     "list_ticket_conversations",
     {
-      ticket_id: z.number()
+      ticket_id: z.number(),
+      page: z.number().optional(),
+      per_page: z.number().max(100).optional()
     },
-    async ({ ticket_id }: any, ctx: any) => {
+    async ({ ticket_id, page, per_page }: any, ctx: any) => {
       try {
-        const res = await getClient(ctx.sessionId).get(`/tickets/${ticket_id}/conversations`);
+        const res = await getClient(ctx.sessionId).get(`/tickets/${ticket_id}/conversations`, {
+          params: { page, per_page }
+        });
         return mcpResponse(res.data);
       } catch (e) {
         return handleApiError(e);

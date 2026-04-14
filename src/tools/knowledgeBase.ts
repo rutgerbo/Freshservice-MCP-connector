@@ -7,10 +7,15 @@ export function registerKnowledgeBaseTools(server: any) {
 
   server.tool(
     "list_solution_categories",
-    {},
-    async (_: any, ctx: any) => {
+    {
+      page: z.number().optional(),
+      per_page: z.number().max(100).optional()
+    },
+    async ({ page, per_page }: any, ctx: any) => {
       try {
-        const res = await getClient(ctx.sessionId).get("/solution_categories");
+        const res = await getClient(ctx.sessionId).get("/solution_categories", {
+          params: { page, per_page }
+        });
         return mcpResponse(res.data);
       } catch (e) {
         return handleApiError(e);
@@ -38,11 +43,15 @@ export function registerKnowledgeBaseTools(server: any) {
   server.tool(
     "list_solution_folders",
     {
-      category_id: z.number()
+      category_id: z.number(),
+      page: z.number().optional(),
+      per_page: z.number().max(100).optional()
     },
-    async ({ category_id }: any, ctx: any) => {
+    async ({ category_id, page, per_page }: any, ctx: any) => {
       try {
-        const res = await getClient(ctx.sessionId).get(`/solution_categories/${category_id}/folders`);
+        const res = await getClient(ctx.sessionId).get(`/solution_categories/${category_id}/folders`, {
+          params: { page, per_page }
+        });
         return mcpResponse(res.data);
       } catch (e) {
         return handleApiError(e);

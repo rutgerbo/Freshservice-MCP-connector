@@ -18,8 +18,11 @@ export async function fetchAllPages(
       },
     });
 
-    const firstKey = Object.keys(response.data)[0];
-    const batch = response.data[firstKey];
+    // Find the array in the response — Freshservice wraps arrays in a
+    // resource-named key e.g. { "tickets": [...] }
+    const keys = Object.keys(response.data);
+    const dataKey = keys.find((k) => Array.isArray(response.data[k])) ?? keys[0];
+    const batch = response.data[dataKey];
 
     if (!Array.isArray(batch) || batch.length === 0) {
       break;
@@ -27,7 +30,11 @@ export async function fetchAllPages(
 
     results.push(...batch);
 
-    if (batch.length < per_page) {
+    // Prefer the Link header (authoritative); fall back to batch-size check
+    const link = response.headers["link"] as string | undefined;
+    const hasMore = link ? link.includes('rel="next"') : batch.length >= per_page;
+
+    if (!hasMore) {
       break;
     }
 
