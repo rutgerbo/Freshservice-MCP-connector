@@ -32,10 +32,25 @@ import { registerProjectTools } from "./tools/projects.js";
 import { registerSlaAndHoursTools } from "./tools/slaAndHours.js";
 import { registerConfigureInstanceTool } from "./tools/configureInstance.js";
 
+import {
+  oauthMetadata,
+  renderAuthorizeForm,
+  processAuthorizeForm,
+  processTokenRequest,
+  extractBearerToken,
+  getCredentialsForToken
+} from "./oauth.js";
+
+import { setSession } from "./sessionStore.js";
+
 const app = express();
 
+const BASE_URL =
+  process.env.BASE_URL ||
+  "https://freshservice-mcp-connector-production.up.railway.app";
+
 /*
-CORS MUST be before all routes
+CORS — must be first
 */
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
@@ -44,68 +59,74 @@ app.use((req, res, next) => {
   next();
 });
 
-/*
-Preflight handlers
-*/
-app.options("/mcp", (_req, res) => res.sendStatus(200));
-app.options("/.well-known/mcp", (_req, res) => res.sendStatus(200));
+app.options("*", (_req, res) => res.sendStatus(200));
 
 /*
-Parse JSON bodies — required for MCP initialize handshake
+Body parsers
 */
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 /*
-Per-session transport store: each Claude Web session gets its own
-McpServer + StreamableHTTPServerTransport so the "already initialized"
-error cannot occur.
+OAuth 2.0 — required for Claude Web remote MCP connections
+*/
+app.get("/.well-known/oauth-authorization-server", (_req, res) => {
+  res.json(oauthMetadata(BASE_URL));
+});
+
+app.get("/oauth/authorize", (req, res) => {
+  res.send(renderAuthorizeForm(req.query as Record<string, string>));
+});
+
+app.post("/oauth/authorize", (req, res) => {
+  const result = processAuthorizeForm(req.body);
+  if ("error" in result) {
+    res.status(result.status).send(result.error);
+    return;
+  }
+  res.redirect(result.redirectUrl);
+});
+
+app.post("/oauth/token", (req, res) => {
+  const result = processTokenRequest(req.body);
+  if ("error" in result) {
+    res.status(result.status).json({ error: result.error });
+    return;
+  }
+  res.json(result.token);
+});
+
+/*
+Per-session MCP transport store
 */
 const sessions = new Map<string, StreamableHTTPServerTransport>();
 
 function createMcpServer(): McpServer {
-  const server = new McpServer({
-    name: "freshservice-mcp",
-    version: "2.0.0"
-  });
+  const server = new McpServer({ name: "freshservice-mcp", version: "2.0.0" });
 
-  // Core ITSM
   registerTicketTools(server);
   registerProblemTools(server);
   registerChangeTools(server);
   registerReleaseTools(server);
-
-  // Asset & Inventory
   registerAssetTools(server);
   registerSoftwareTools(server);
   registerContractTools(server);
   registerVendorTools(server);
   registerProductTools(server);
-
-  // Service Catalog & Workflows
   registerServiceCatalogTools(server);
   registerWorkflowTools(server);
   registerRelationshipTools(server);
-
-  // Sub-resources
   registerTaskTools(server);
   registerTimeEntryTools(server);
-
-  // People & Org
   registerRequesterTools(server);
   registerAgentTools(server);
   registerGroupTools(server);
   registerDepartmentTools(server);
   registerLocationTools(server);
-
-  // Knowledge & Communication
   registerKnowledgeBaseTools(server);
   registerAnnouncementTools(server);
-
-  // Projects & System
   registerProjectTools(server);
   registerSlaAndHoursTools(server);
-
-  // Utilities
   registerSearchTools(server);
   registerSyncTools(server);
   registerConfigureInstanceTool(server);
@@ -114,29 +135,37 @@ function createMcpServer(): McpServer {
 }
 
 /*
-MCP endpoint — handles POST (JSON-RPC), GET (SSE stream), DELETE (session close)
+MCP endpoint
 */
 app.post("/mcp", async (req, res) => {
   const sessionId = req.headers["mcp-session-id"] as string | undefined;
 
   if (sessionId && sessions.has(sessionId)) {
-    const transport = sessions.get(sessionId)!;
-    await transport.handleRequest(req, res, req.body);
+    await sessions.get(sessionId)!.handleRequest(req, res, req.body);
     return;
   }
 
-  // New session: create a dedicated transport + server pair
+  // New session
+  const bearerToken = extractBearerToken(req.headers.authorization);
+
   const transport = new StreamableHTTPServerTransport({
     sessionIdGenerator: () => crypto.randomUUID(),
     onsessioninitialized: (newSessionId) => {
       sessions.set(newSessionId, transport);
+
+      // Pre-load Freshservice credentials from OAuth token so tools work
+      // without needing a separate configure_freshservice_instance call
+      if (bearerToken) {
+        const creds = getCredentialsForToken(bearerToken);
+        if (creds) {
+          setSession(newSessionId, creds);
+        }
+      }
     }
   });
 
   transport.onclose = () => {
-    if (transport.sessionId) {
-      sessions.delete(transport.sessionId);
-    }
+    if (transport.sessionId) sessions.delete(transport.sessionId);
   };
 
   const server = createMcpServer();
@@ -144,48 +173,43 @@ app.post("/mcp", async (req, res) => {
   await transport.handleRequest(req, res, req.body);
 });
 
+// GET /mcp — SSE stream for an existing session, or 405 if no session
 app.get("/mcp", async (req, res) => {
   const sessionId = req.headers["mcp-session-id"] as string | undefined;
   if (!sessionId || !sessions.has(sessionId)) {
-    res.status(400).json({ error: "Session not found. Start with POST /mcp." });
+    res.status(405).json({ error: "Use POST /mcp to start a session." });
     return;
   }
   await sessions.get(sessionId)!.handleRequest(req, res);
 });
 
+// DELETE /mcp — explicit session termination
 app.delete("/mcp", async (req, res) => {
   const sessionId = req.headers["mcp-session-id"] as string | undefined;
   if (!sessionId || !sessions.has(sessionId)) {
-    res.status(400).json({ error: "Session not found." });
+    res.status(404).json({ error: "Session not found." });
     return;
   }
   await sessions.get(sessionId)!.handleRequest(req, res);
 });
 
 /*
-Discovery endpoint
+Discovery + health
 */
 app.get("/.well-known/mcp", (_req, res) => {
   res.json({
     name: "freshservice-mcp",
     version: "2.0.0",
     capabilities: { tools: {} },
-    transport: {
-      type: "streamable-http",
-      endpoint: "/mcp"
-    }
+    transport: { type: "streamable-http", endpoint: "/mcp" }
   });
 });
 
-/*
-Health endpoint
-*/
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", sessions: sessions.size });
 });
 
 const port = Number(process.env.PORT) || 8080;
-
 app.listen(port, () => {
   console.log(`Freshservice MCP server running on port ${port}`);
 });
