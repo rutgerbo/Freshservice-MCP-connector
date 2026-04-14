@@ -78,6 +78,30 @@ export function registerServiceCatalogTools(server: any) {
 
 
   server.tool(
+    "place_service_catalog_request",
+    {
+      display_id: z.number(),
+      requested_for: z.string(),
+      quantity: z.number().optional(),
+      custom_fields: z.record(z.unknown()).optional()
+    },
+    async ({ display_id, requested_for, quantity = 1, custom_fields }: any, ctx: any) => {
+      try {
+        const body: Record<string, unknown> = { quantity, requested_for };
+        if (custom_fields) body.custom_fields = custom_fields;
+        const res = await getClient(ctx.sessionId).post(
+          `/service_catalog/items/${display_id}/place_request`,
+          body
+        );
+        return mcpResponse(res.data);
+      } catch (e) {
+        return handleApiError(e);
+      }
+    }
+  );
+
+
+  server.tool(
     "get_service_request",
     {
       request_id: z.number()
