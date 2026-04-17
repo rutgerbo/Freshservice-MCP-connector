@@ -120,6 +120,67 @@ export function registerServiceCatalogTools(server: any) {
 
 
   server.tool(
+    "create_service_catalog_item",
+    {
+      name: z.string(),
+      category_id: z.number(),
+      description: z.string().optional(),
+      short_description: z.string().optional(),
+      display_order: z.number().optional(),
+      visible_in_portal: z.boolean().optional(),
+      cost_visibility: z.boolean().optional(),
+      delivery_time: z.number().optional(),
+      allow_attachments: z.boolean().optional(),
+      allow_quantity: z.boolean().optional(),
+      custom_fields: z.record(z.unknown()).optional()
+    },
+    async (params: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post("/service_catalog_items", params);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "update_service_catalog_item",
+    {
+      item_id: z.number(),
+      name: z.string().optional(),
+      category_id: z.number().optional(),
+      description: z.string().optional(),
+      short_description: z.string().optional(),
+      display_order: z.number().optional(),
+      visible_in_portal: z.boolean().optional(),
+      cost_visibility: z.boolean().optional(),
+      delivery_time: z.number().optional(),
+      allow_attachments: z.boolean().optional(),
+      allow_quantity: z.boolean().optional(),
+      custom_fields: z.record(z.unknown()).optional()
+    },
+    async ({ item_id, ...updates }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(`/service_catalog_items/${item_id}`, updates);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "delete_service_catalog_item",
+    { item_id: z.number() },
+    async ({ item_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(`/service_catalog_items/${item_id}`);
+        return mcpResponse({ success: true, message: `Service catalog item ${item_id} deleted.` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
     "get_service_request",
     {
       request_id: z.number()
