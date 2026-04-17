@@ -194,4 +194,31 @@ export function registerReleaseTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "list_release_fields",
+    {},
+    async (_: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get("/release_fields");
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "move_release",
+    { release_id: z.number(), workspace_id: z.number() },
+    async ({ release_id, workspace_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(
+          `/releases/${release_id}/move_to_workspace`,
+          { workspace_id }
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

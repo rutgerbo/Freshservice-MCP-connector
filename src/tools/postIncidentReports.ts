@@ -58,4 +58,48 @@ export function registerPostIncidentReportTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "enable_pir_template",
+    { template_id: z.number() },
+    async ({ template_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(
+          `/post_incident_report_templates/${template_id}/enable`,
+          {}
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "mark_pir_template_primary",
+    { template_id: z.number() },
+    async ({ template_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(
+          `/post_incident_report_templates/${template_id}/mark_primary`,
+          {}
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "export_pir_template",
+    { template_id: z.number() },
+    async ({ template_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(
+          `/post_incident_report_templates/${template_id}/export`
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

@@ -386,4 +386,76 @@ export function registerTicketTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "list_child_tickets",
+    { ticket_id: z.number() },
+    async ({ ticket_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(`/tickets/${ticket_id}/child_tickets`);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "promote_to_major_incident",
+    { ticket_id: z.number() },
+    async ({ ticket_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post(
+          `/tickets/${ticket_id}/promote_to_major_incident`,
+          {}
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "demote_from_major_incident",
+    { ticket_id: z.number() },
+    async ({ ticket_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post(
+          `/tickets/${ticket_id}/demote_from_major_incident`,
+          {}
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "list_ticket_fields",
+    {},
+    async (_: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get("/ticket_fields");
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "move_ticket",
+    {
+      ticket_id: z.number(),
+      workspace_id: z.number()
+    },
+    async ({ ticket_id, workspace_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(
+          `/tickets/${ticket_id}/move_to_workspace`,
+          { workspace_id }
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

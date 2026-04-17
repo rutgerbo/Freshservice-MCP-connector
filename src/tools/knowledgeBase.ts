@@ -288,4 +288,63 @@ export function registerKnowledgeBaseTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "list_solution_sub_folders",
+    { folder_id: z.number(), page: z.number().optional(), per_page: z.number().optional() },
+    async ({ folder_id, page, per_page }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(
+          `/solution_folders/${folder_id}/sub_folders`,
+          { params: { page, per_page } }
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "submit_solution_article_for_approval",
+    { article_id: z.number() },
+    async ({ article_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(
+          `/solution_articles/${article_id}`,
+          { status: 3 }
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "restore_solution_article",
+    { article_id: z.number() },
+    async ({ article_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(
+          `/solution_articles/${article_id}/restore`,
+          {}
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "permanently_delete_solution_article",
+    { article_id: z.number() },
+    async ({ article_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(
+          `/solution_articles/${article_id}/permanently_delete`
+        );
+        return mcpResponse({ success: true, message: `Article ${article_id} permanently deleted.` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

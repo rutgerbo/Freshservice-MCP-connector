@@ -136,4 +136,102 @@ export function registerStatusPageTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "list_status_pages",
+    {},
+    async (_: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get("/status_pages");
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "list_status_page_service_components",
+    { page: z.number().optional(), per_page: z.number().optional() },
+    async ({ page, per_page }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get("/status_pages/service_components", {
+          params: { page, per_page }
+        });
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "update_status_page_incident_update",
+    {
+      incident_id: z.number(),
+      update_id: z.number(),
+      message: z.string().optional(),
+      status: z.number().optional()
+    },
+    async ({ incident_id, update_id, ...body }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(
+          `/status_pages/incidents/${incident_id}/updates/${update_id}`,
+          body
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "delete_status_page_incident_update",
+    { incident_id: z.number(), update_id: z.number() },
+    async ({ incident_id, update_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(
+          `/status_pages/incidents/${incident_id}/updates/${update_id}`
+        );
+        return mcpResponse({ success: true, message: `Incident update ${update_id} deleted.` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "list_status_page_subscribers",
+    { page: z.number().optional(), per_page: z.number().optional() },
+    async ({ page, per_page }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get("/status_pages/subscribers", {
+          params: { page, per_page }
+        });
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "create_status_page_subscriber",
+    { email: z.string(), component_ids: z.array(z.number()).optional() },
+    async (params: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post("/status_pages/subscribers", params);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "delete_status_page_subscriber",
+    { subscriber_id: z.number() },
+    async ({ subscriber_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(`/status_pages/subscribers/${subscriber_id}`);
+        return mcpResponse({ success: true, message: `Subscriber ${subscriber_id} deleted.` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

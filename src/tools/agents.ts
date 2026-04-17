@@ -175,4 +175,16 @@ export function registerAgentTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "list_agent_fields",
+    {},
+    async (_: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get("/agent_fields");
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

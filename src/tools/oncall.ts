@@ -164,4 +164,90 @@ export function registerOncallTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "list_oncall_shifts",
+    { schedule_id: z.number() },
+    async ({ schedule_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(`/schedules/${schedule_id}/shifts`);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "create_oncall_shift",
+    {
+      schedule_id: z.number(),
+      name: z.string().optional(),
+      color: z.string().optional(),
+      time_zone: z.string().optional(),
+      start_time: z.string().optional(),
+      duration: z.number().optional(),
+      rotation_type: z.string().optional(),
+      agent_ids: z.array(z.number()).optional()
+    },
+    async ({ schedule_id, ...body }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post(`/schedules/${schedule_id}/shifts`, body);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "update_oncall_shift",
+    {
+      schedule_id: z.number(),
+      shift_id: z.number(),
+      name: z.string().optional(),
+      agent_ids: z.array(z.number()).optional()
+    },
+    async ({ schedule_id, shift_id, ...updates }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(
+          `/schedules/${schedule_id}/shifts/${shift_id}`,
+          updates
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "delete_oncall_shift",
+    { schedule_id: z.number(), shift_id: z.number() },
+    async ({ schedule_id, shift_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(`/schedules/${schedule_id}/shifts/${shift_id}`);
+        return mcpResponse({ success: true, message: `Shift ${shift_id} deleted.` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "create_oncall_override",
+    {
+      schedule_id: z.number(),
+      shift_id: z.number(),
+      start_time: z.string(),
+      end_time: z.string(),
+      agent_id: z.number()
+    },
+    async ({ schedule_id, shift_id, ...body }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post(
+          `/schedules/${schedule_id}/shifts/${shift_id}/overrides`,
+          body
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

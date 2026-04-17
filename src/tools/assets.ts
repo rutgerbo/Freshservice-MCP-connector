@@ -259,4 +259,109 @@ export function registerAssetTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "get_asset_assignment_history",
+    { asset_id: z.number() },
+    async ({ asset_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(`/assets/${asset_id}/history`);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "list_asset_fields",
+    { asset_type_id: z.number() },
+    async ({ asset_type_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(`/asset_types/${asset_type_id}/fields`);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "create_asset_type",
+    {
+      name: z.string(),
+      description: z.string().optional(),
+      parent_asset_type_id: z.number().optional()
+    },
+    async (params: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post("/asset_types", params);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "update_asset_type",
+    {
+      asset_type_id: z.number(),
+      name: z.string().optional(),
+      description: z.string().optional()
+    },
+    async ({ asset_type_id, ...updates }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(`/asset_types/${asset_type_id}`, updates);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "delete_asset_type",
+    { asset_type_id: z.number() },
+    async ({ asset_type_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(`/asset_types/${asset_type_id}`);
+        return mcpResponse({ success: true, message: `Asset type ${asset_type_id} deleted.` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "create_asset_component",
+    {
+      asset_id: z.number(),
+      component_type: z.string(),
+      name: z.string().optional(),
+      description: z.string().optional()
+    },
+    async ({ asset_id, ...body }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post(`/assets/${asset_id}/components`, body);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "update_asset_component",
+    {
+      asset_id: z.number(),
+      component_id: z.number(),
+      name: z.string().optional(),
+      description: z.string().optional()
+    },
+    async ({ asset_id, component_id, ...updates }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(
+          `/assets/${asset_id}/components/${component_id}`,
+          updates
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

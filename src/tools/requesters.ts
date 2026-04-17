@@ -165,4 +165,16 @@ export function registerRequesterTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "list_requester_fields",
+    {},
+    async (_: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get("/requester_fields");
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

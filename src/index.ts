@@ -44,6 +44,12 @@ import { registerWorkspaceTools } from "./tools/workspaces.js";
 import { registerPostIncidentReportTools } from "./tools/postIncidentReports.js";
 import { registerJourneyTools } from "./tools/journeys.js";
 import { registerDelegationTools } from "./tools/delegations.js";
+import { registerPmProjectTools } from "./tools/pmProjects.js";
+import { registerApprovalTools } from "./tools/approvals.js";
+import { registerCollaborateTools } from "./tools/collaborate.js";
+import { registerPhysicalSubtypeTools } from "./tools/physicalSubtypes.js";
+import { registerDeviceTools } from "./tools/devices.js";
+import { registerCloudResourceTools } from "./tools/cloudResources.js";
 
 const app = express();
 
@@ -130,6 +136,18 @@ function createMcpServer(): McpServer {
   registerOnboardingTools(server);
   registerJourneyTools(server);
   registerDelegationTools(server);
+
+  // Project Management (NewGen)
+  registerPmProjectTools(server);
+
+  // Approvals & Collaboration
+  registerApprovalTools(server);
+  registerCollaborateTools(server);
+
+  // Assets Extended
+  registerPhysicalSubtypeTools(server);
+  registerDeviceTools(server);
+  registerCloudResourceTools(server);
 
   // Monitoring & Ops
   registerAlertTools(server);

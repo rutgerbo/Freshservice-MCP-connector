@@ -196,4 +196,43 @@ export function registerProblemTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "restore_problem",
+    { problem_id: z.number() },
+    async ({ problem_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(`/problems/${problem_id}/restore`, {});
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "list_problem_fields",
+    {},
+    async (_: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get("/problem_fields");
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "move_problem",
+    { problem_id: z.number(), workspace_id: z.number() },
+    async ({ problem_id, workspace_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(
+          `/problems/${problem_id}/move_to_workspace`,
+          { workspace_id }
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

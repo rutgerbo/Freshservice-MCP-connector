@@ -223,4 +223,62 @@ export function registerChangeTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "create_change_approval",
+    {
+      change_id: z.number(),
+      approver_id: z.number(),
+      approval_type: z.number().optional()
+    },
+    async ({ change_id, ...body }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post(`/changes/${change_id}/approvals`, body);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "send_change_approval_reminder",
+    { change_id: z.number(), approval_id: z.number() },
+    async ({ change_id, approval_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post(
+          `/changes/${change_id}/approvals/${approval_id}/reminders`,
+          {}
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "list_change_fields",
+    {},
+    async (_: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get("/change_fields");
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "move_change",
+    { change_id: z.number(), workspace_id: z.number() },
+    async ({ change_id, workspace_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(
+          `/changes/${change_id}/move_to_workspace`,
+          { workspace_id }
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

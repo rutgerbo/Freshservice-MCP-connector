@@ -167,4 +167,30 @@ export function registerContractTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "list_contract_type_fields",
+    { contract_type_id: z.number() },
+    async ({ contract_type_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(
+          `/contract_types/${contract_type_id}/fields`
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "list_contract_attachments",
+    { contract_id: z.number() },
+    async ({ contract_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(`/contracts/${contract_id}/attachments`);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

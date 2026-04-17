@@ -195,4 +195,109 @@ export function registerServiceCatalogTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "list_service_catalog_shared_fields",
+    {},
+    async (_: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get("/service_catalog_shared_fields");
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "get_service_catalog_shared_field",
+    { field_id: z.number() },
+    async ({ field_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(`/service_catalog_shared_fields/${field_id}`);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "create_service_catalog_shared_field",
+    {
+      label: z.string(),
+      field_type: z.string(),
+      description: z.string().optional(),
+      required: z.boolean().optional(),
+      choices: z.array(z.string()).optional()
+    },
+    async (params: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post("/service_catalog_shared_fields", params);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "update_service_catalog_shared_field",
+    {
+      field_id: z.number(),
+      label: z.string().optional(),
+      description: z.string().optional(),
+      required: z.boolean().optional(),
+      choices: z.array(z.string()).optional()
+    },
+    async ({ field_id, ...updates }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(
+          `/service_catalog_shared_fields/${field_id}`,
+          updates
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "delete_service_catalog_shared_field",
+    { field_id: z.number() },
+    async ({ field_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(`/service_catalog_shared_fields/${field_id}`);
+        return mcpResponse({ success: true, message: `Shared field ${field_id} deleted.` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "archive_service_catalog_shared_field",
+    { field_id: z.number() },
+    async ({ field_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(
+          `/service_catalog_shared_fields/${field_id}/archive`,
+          {}
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "unarchive_service_catalog_shared_field",
+    { field_id: z.number() },
+    async ({ field_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(
+          `/service_catalog_shared_fields/${field_id}/unarchive`,
+          {}
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

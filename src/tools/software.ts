@@ -163,4 +163,98 @@ export function registerSoftwareTools(server: any) {
     }
   );
 
+
+  server.tool(
+    "get_software_user",
+    { software_id: z.number(), user_id: z.number() },
+    async ({ software_id, user_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(`/softwares/${software_id}/users/${user_id}`);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "add_software_user",
+    {
+      software_id: z.number(),
+      user_id: z.number(),
+      license_id: z.number().optional(),
+      category: z.string().optional()
+    },
+    async ({ software_id, ...body }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post(`/softwares/${software_id}/users`, body);
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "update_software_user",
+    {
+      software_id: z.number(),
+      user_id: z.number(),
+      license_id: z.number().optional(),
+      category: z.string().optional()
+    },
+    async ({ software_id, user_id, ...updates }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).put(
+          `/softwares/${software_id}/users/${user_id}`,
+          updates
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "delete_software_user",
+    { software_id: z.number(), user_id: z.number() },
+    async ({ software_id, user_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(`/softwares/${software_id}/users/${user_id}`);
+        return mcpResponse({ success: true, message: `User ${user_id} removed from software.` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "add_software_installation",
+    {
+      software_id: z.number(),
+      installation_machine_id: z.number(),
+      license_id: z.number().optional()
+    },
+    async ({ software_id, ...body }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).post(
+          `/softwares/${software_id}/installations`,
+          body
+        );
+        return mcpResponse(res.data);
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
+
+  server.tool(
+    "delete_software_installation",
+    { software_id: z.number(), installation_id: z.number() },
+    async ({ software_id, installation_id }: any, ctx: any) => {
+      try {
+        await getClient(ctx.sessionId).delete(
+          `/softwares/${software_id}/installations/${installation_id}`
+        );
+        return mcpResponse({ success: true, message: `Installation ${installation_id} deleted.` });
+      } catch (e) { return handleApiError(e); }
+    }
+  );
+
 }

@@ -81,6 +81,26 @@ export function registerTimeEntryTools(server: any) {
 
 
   server.tool(
+    "get_time_entry",
+    {
+      parent_type: parentTypeSchema,
+      parent_id: z.number(),
+      time_entry_id: z.number()
+    },
+    async ({ parent_type, parent_id, time_entry_id }: any, ctx: any) => {
+      try {
+        const res = await getClient(ctx.sessionId).get(
+          `/${parent_type}/${parent_id}/time_entries/${time_entry_id}`
+        );
+        return mcpResponse(res.data);
+      } catch (e) {
+        return handleApiError(e);
+      }
+    }
+  );
+
+
+  server.tool(
     "delete_time_entry",
     {
       parent_type: parentTypeSchema,
