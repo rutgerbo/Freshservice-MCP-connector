@@ -17,7 +17,7 @@ export function registerAuditLogTools(server: any) {
     },
     async ({ page, per_page, since, before, actor_id, event_type }: any, ctx: any) => {
       try {
-        const res = await getClient(ctx.sessionId).get("/audit_logs", {
+        const res = await getClient(ctx.sessionId).get("/audit_log", {
           params: { page, per_page, since, before, actor_id, event_type }
         });
         return mcpResponse(res.data);
@@ -37,7 +37,7 @@ export function registerAuditLogTools(server: any) {
     },
     async (params: any, ctx: any) => {
       try {
-        const res = await getClient(ctx.sessionId).post("/audit_logs/export", params);
+        const res = await getClient(ctx.sessionId).post("/audit_log/export", params);
         return mcpResponse(res.data);
       } catch (e) { return handleApiError(e); }
     }
