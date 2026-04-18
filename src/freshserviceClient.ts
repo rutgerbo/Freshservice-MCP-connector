@@ -20,3 +20,8 @@ export function getClient(sessionId: string) {
   });
 
 }
+
+export function getWorkspaceId(sessionId: string): number {
+  const session = getSession(sessionId);
+  return session?.workspace_id ?? 2;
+}
