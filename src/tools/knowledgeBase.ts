@@ -14,7 +14,7 @@ export function registerKnowledgeBaseTools(server: any) {
     async ({ page, per_page }: any, ctx: any) => {
       try {
         const workspace_id = getWorkspaceId(ctx.sessionId);
-        const res = await getClient(ctx.sessionId).get("/solution_categories", {
+        const res = await getClient(ctx.sessionId).get("/solutions/categories", {
           params: { page, per_page, workspace_id }
         });
         return mcpResponse(res.data);
@@ -33,7 +33,7 @@ export function registerKnowledgeBaseTools(server: any) {
     async ({ category_id }: any, ctx: any) => {
       try {
         const workspace_id = getWorkspaceId(ctx.sessionId);
-        const res = await getClient(ctx.sessionId).get(`/solution_categories/${category_id}`, {
+        const res = await getClient(ctx.sessionId).get(`/solutions/categories/${category_id}`, {
           params: { workspace_id }
         });
         return mcpResponse(res.data);
@@ -54,7 +54,7 @@ export function registerKnowledgeBaseTools(server: any) {
     async ({ category_id, page, per_page }: any, ctx: any) => {
       try {
         const workspace_id = getWorkspaceId(ctx.sessionId);
-        const res = await getClient(ctx.sessionId).get(`/solution_categories/${category_id}/folders`, {
+        const res = await getClient(ctx.sessionId).get(`/solutions/categories/${category_id}/folders`, {
           params: { page, per_page, workspace_id }
         });
         return mcpResponse(res.data);
@@ -73,7 +73,7 @@ export function registerKnowledgeBaseTools(server: any) {
     async ({ folder_id }: any, ctx: any) => {
       try {
         const workspace_id = getWorkspaceId(ctx.sessionId);
-        const res = await getClient(ctx.sessionId).get(`/solution_folders/${folder_id}`, {
+        const res = await getClient(ctx.sessionId).get(`/solutions/folders/${folder_id}`, {
           params: { workspace_id }
         });
         return mcpResponse(res.data);
@@ -95,7 +95,7 @@ export function registerKnowledgeBaseTools(server: any) {
       try {
         const workspace_id = getWorkspaceId(ctx.sessionId);
         const res = await getClient(ctx.sessionId).get(
-          `/solution_folders/${folder_id}/articles`,
+          `/solutions/folders/${folder_id}/articles`,
           { params: { page, per_page, workspace_id } }
         );
         return mcpResponse(res.data);
@@ -114,7 +114,7 @@ export function registerKnowledgeBaseTools(server: any) {
     async ({ article_id }: any, ctx: any) => {
       try {
         const workspace_id = getWorkspaceId(ctx.sessionId);
-        const res = await getClient(ctx.sessionId).get(`/solution_articles/${article_id}`, {
+        const res = await getClient(ctx.sessionId).get(`/solutions/articles/${article_id}`, {
           params: { workspace_id }
         });
         return mcpResponse(res.data);
@@ -131,7 +131,6 @@ export function registerKnowledgeBaseTools(server: any) {
       title: z.string(),
       description: z.string(),
       folder_id: z.number(),
-      author_id: z.number().optional(),
       status: z.number().optional(),
       tags: z.array(z.string()).optional(),
       keywords: z.array(z.string()).optional()
@@ -139,7 +138,7 @@ export function registerKnowledgeBaseTools(server: any) {
     async (params: any, ctx: any) => {
       try {
         const workspace_id = getWorkspaceId(ctx.sessionId);
-        const res = await getClient(ctx.sessionId).post("/solution_articles", {
+        const res = await getClient(ctx.sessionId).post("/solutions/articles", {
           ...params,
           workspace_id
         });
@@ -164,7 +163,7 @@ export function registerKnowledgeBaseTools(server: any) {
     async ({ article_id, ...updates }: any, ctx: any) => {
       try {
         const workspace_id = getWorkspaceId(ctx.sessionId);
-        const res = await getClient(ctx.sessionId).put(`/solution_articles/${article_id}`, {
+        const res = await getClient(ctx.sessionId).put(`/solutions/articles/${article_id}`, {
           ...updates,
           workspace_id
         });
@@ -184,7 +183,7 @@ export function registerKnowledgeBaseTools(server: any) {
     async ({ article_id }: any, ctx: any) => {
       try {
         const workspace_id = getWorkspaceId(ctx.sessionId);
-        await getClient(ctx.sessionId).delete(`/solution_articles/${article_id}`, {
+        await getClient(ctx.sessionId).delete(`/solutions/articles/${article_id}`, {
           params: { workspace_id }
         });
         return mcpResponse({ success: true, message: `Article ${article_id} deleted.` });
@@ -205,7 +204,7 @@ export function registerKnowledgeBaseTools(server: any) {
     async ({ term, page, per_page }: any, ctx: any) => {
       try {
         const workspace_id = getWorkspaceId(ctx.sessionId);
-        const res = await getClient(ctx.sessionId).get("/solution_articles/search", {
+        const res = await getClient(ctx.sessionId).get("/solutions/articles/search", {
           params: { term, page, per_page, workspace_id }
         });
         return mcpResponse(res.data);
@@ -221,7 +220,7 @@ export function registerKnowledgeBaseTools(server: any) {
       try {
         const workspace_id = getWorkspaceId(ctx.sessionId);
         const res = await getClient(ctx.sessionId).put(
-          `/solution_articles/${article_id}`,
+          `/solutions/articles/${article_id}`,
           { status: 2, workspace_id }
         );
         return mcpResponse(res.data);
@@ -236,7 +235,7 @@ export function registerKnowledgeBaseTools(server: any) {
     async (params: any, ctx: any) => {
       try {
         const workspace_id = getWorkspaceId(ctx.sessionId);
-        const res = await getClient(ctx.sessionId).post("/solution_categories", {
+        const res = await getClient(ctx.sessionId).post("/solutions/categories", {
           ...params,
           workspace_id
         });
@@ -253,7 +252,7 @@ export function registerKnowledgeBaseTools(server: any) {
       try {
         const workspace_id = getWorkspaceId(ctx.sessionId);
         const res = await getClient(ctx.sessionId).put(
-          `/solution_categories/${category_id}`,
+          `/solutions/categories/${category_id}`,
           { ...updates, workspace_id }
         );
         return mcpResponse(res.data);
@@ -268,7 +267,7 @@ export function registerKnowledgeBaseTools(server: any) {
     async ({ category_id }: any, ctx: any) => {
       try {
         const workspace_id = getWorkspaceId(ctx.sessionId);
-        await getClient(ctx.sessionId).delete(`/solution_categories/${category_id}`, {
+        await getClient(ctx.sessionId).delete(`/solutions/categories/${category_id}`, {
           params: { workspace_id }
         });
         return mcpResponse({ success: true, message: `Category ${category_id} deleted.` });
@@ -288,7 +287,7 @@ export function registerKnowledgeBaseTools(server: any) {
     async (params: any, ctx: any) => {
       try {
         const workspace_id = getWorkspaceId(ctx.sessionId);
-        const res = await getClient(ctx.sessionId).post("/solution_folders", {
+        const res = await getClient(ctx.sessionId).post("/solutions/folders", {
           ...params,
           workspace_id
         });
@@ -309,7 +308,7 @@ export function registerKnowledgeBaseTools(server: any) {
     async ({ folder_id, ...updates }: any, ctx: any) => {
       try {
         const workspace_id = getWorkspaceId(ctx.sessionId);
-        const res = await getClient(ctx.sessionId).put(`/solution_folders/${folder_id}`, {
+        const res = await getClient(ctx.sessionId).put(`/solutions/folders/${folder_id}`, {
           ...updates,
           workspace_id
         });
@@ -325,7 +324,7 @@ export function registerKnowledgeBaseTools(server: any) {
     async ({ folder_id }: any, ctx: any) => {
       try {
         const workspace_id = getWorkspaceId(ctx.sessionId);
-        await getClient(ctx.sessionId).delete(`/solution_folders/${folder_id}`, {
+        await getClient(ctx.sessionId).delete(`/solutions/folders/${folder_id}`, {
           params: { workspace_id }
         });
         return mcpResponse({ success: true, message: `Folder ${folder_id} deleted.` });
@@ -341,7 +340,7 @@ export function registerKnowledgeBaseTools(server: any) {
       try {
         const workspace_id = getWorkspaceId(ctx.sessionId);
         const res = await getClient(ctx.sessionId).get(
-          `/solution_folders/${folder_id}/sub_folders`,
+          `/solutions/folders/${folder_id}/sub_folders`,
           { params: { page, per_page, workspace_id } }
         );
         return mcpResponse(res.data);
@@ -357,7 +356,7 @@ export function registerKnowledgeBaseTools(server: any) {
       try {
         const workspace_id = getWorkspaceId(ctx.sessionId);
         const res = await getClient(ctx.sessionId).put(
-          `/solution_articles/${article_id}`,
+          `/solutions/articles/${article_id}`,
           { status: 3, workspace_id }
         );
         return mcpResponse(res.data);
@@ -373,7 +372,7 @@ export function registerKnowledgeBaseTools(server: any) {
       try {
         const workspace_id = getWorkspaceId(ctx.sessionId);
         const res = await getClient(ctx.sessionId).put(
-          `/solution_articles/${article_id}/restore`,
+          `/solutions/articles/${article_id}/restore`,
           { workspace_id }
         );
         return mcpResponse(res.data);
@@ -389,7 +388,7 @@ export function registerKnowledgeBaseTools(server: any) {
       try {
         const workspace_id = getWorkspaceId(ctx.sessionId);
         await getClient(ctx.sessionId).delete(
-          `/solution_articles/${article_id}/permanently_delete`,
+          `/solutions/articles/${article_id}/permanently_delete`,
           { params: { workspace_id } }
         );
         return mcpResponse({ success: true, message: `Article ${article_id} permanently deleted.` });
