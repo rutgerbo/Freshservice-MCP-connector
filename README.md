@@ -1,497 +1,179 @@
-# freshservice-mcp
+# Freshservice MCP Connector
 
-A local MCP server for **Freshservice API v2**, intended for **Claude Desktop on Windows**.
-
-This template uses:
-
-- **TypeScript**
-- **Node.js 20+**
-- **STDIO transport** for Claude Desktop
-- **Freshservice API key auth**
-
-## What this server includes
-
-This template exposes these MCP tools:
-
-- `get_ticket`
-- `list_tickets`
-- `search_tickets`
-- `create_ticket`
-- `update_ticket`
-- `get_requester`
-- `get_agent`
-- `list_changes`
-- `raw_request`
-
-`raw_request` is there so you can reach any `/api/v2/...` endpoint even before you add a dedicated tool for it.
+A **remote MCP server** exposing the full **Freshservice API v2** as Claude tools, deployed on **Railway** and compatible with **Claude.ai**, **Claude Desktop**, and any MCP-capable client.
 
 ---
 
-## 1. Prerequisites
+## What it is
 
-Install these on your Windows machine:
+This connector wraps the Freshservice v2 REST API as ~300 MCP tools across every major Freshservice domain: tickets, problems, changes, releases, assets, software, contracts, service catalog, knowledge base, agents, requesters, groups, departments, locations, projects, on-call, status pages, approvals, and more.
 
-1. **Git for Windows**
-2. **Node.js LTS** (20 or newer recommended)
-3. **Claude Desktop**
-4. A **Freshservice API key**
-5. Your **Freshservice domain**, such as `companyname.freshservice.com`
-
-Check Node after install:
-
-```powershell
-node --version
-npm --version
-```
+Authentication is **per-session** — each Claude chat configures its own Freshservice tenant by calling `configure_freshservice_instance`. No shared credentials, no `.env` file needed.
 
 ---
 
-## 2. Create a GitHub repository
+## Transport
 
-Create a new GitHub repo, for example:
-
-```text
-freshservice-mcp
-```
-
-Then clone it locally:
-
-```powershell
-git clone https://github.com/YOUR_GITHUB_USERNAME/freshservice-mcp.git
-cd freshservice-mcp
-```
-
-Copy the files from this template into that repo.
+**Streamable HTTP** (`/mcp` endpoint). This is a remote MCP server — not a local STDIO process. It runs continuously on Railway and is accessed over HTTPS.
 
 ---
 
-## 3. Install dependencies
+## Connecting from Claude Desktop
 
-From the project folder:
-
-```powershell
-npm install
-```
-
----
-
-## 4. Add your secrets locally
-
-Copy the example environment file:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-Edit `.env` and set:
-
-```env
-FRESHSERVICE_DOMAIN=yourcompany.freshservice.com
-FRESHSERVICE_API_KEY=replace_with_your_api_key
-```
-
-Important:
-
-- Do **not** commit `.env`
-- Use the bare domain name, not a full URL
-- The API key should belong to a service account or integration account if possible
-
----
-
-## 5. Build the server
-
-```powershell
-npm run build
-```
-
-That creates the compiled code in `dist/`.
-
----
-
-## 6. Test the server directly
-
-You can test that it starts without Claude first:
-
-```powershell
-$env:FRESHSERVICE_DOMAIN="yourcompany.freshservice.com"
-$env:FRESHSERVICE_API_KEY="your_api_key"
-node .\dist\index.js
-```
-
-Expected result:
-
-- The process starts
-- It waits silently for MCP input
-- You may see a startup line in stderr saying the server is running
-
-To stop it:
-
-```powershell
-Ctrl+C
-```
-
----
-
-## 7. Configure Claude Desktop on Windows
-
-Claude Desktop uses a config file at:
-
-```text
-%APPDATA%\Claude\claude_desktop_config.json
-```
-
-A typical Windows path is:
-
-```text
-C:\Users\YOUR_USERNAME\AppData\Roaming\Claude\claude_desktop_config.json
-```
-
-Open Claude Desktop:
-
-1. Go to **Settings**
-2. Open **Developer**
-3. Choose **Edit Config**
-
-Then put in a config like this. Replace the paths and values with your own:
+Add this to `claude_desktop_config.json`
+(`%APPDATA%\Claude\claude_desktop_config.json` on Windows, `~/Library/Application Support/Claude/claude_desktop_config.json` on Mac):
 
 ```json
 {
   "mcpServers": {
     "freshservice": {
-      "command": "node",
-      "args": [
-        "C:\\Users\\YOUR_USERNAME\\source\\repos\\freshservice-mcp\\dist\\index.js"
-      ],
-      "env": {
-        "FRESHSERVICE_DOMAIN": "yourcompany.freshservice.com",
-        "FRESHSERVICE_API_KEY": "your_api_key"
-      }
+      "type": "http",
+      "url": "https://freshservice-mcp-connector-production.up.railway.app/mcp"
     }
   }
 }
 ```
 
-### Important Windows notes
+Fully restart Claude Desktop after saving. The connector will appear in the tools menu on next launch.
 
-- Use **absolute paths**
-- Escape backslashes in JSON as `\\`
-- Keep secrets in the `env` block or load them via a wrapper script
-- After editing the config, fully restart Claude Desktop
+Then in Claude, run `configure_freshservice_instance` once per session.
 
 ---
 
-## 8. Verify the server inside Claude Desktop
+## Connecting from Claude Web (claude.ai)
 
-After restart:
+1. Go to [claude.ai](https://claude.ai) and sign in
+2. Click your **profile icon** (bottom-left) → **Settings**
+3. Open the **Integrations** tab
+4. Click **Add integration**
+5. Enter a name (e.g. `Freshservice`) and the server URL:
+   ```
+   https://freshservice-mcp-connector-production.up.railway.app/mcp
+   ```
+6. Click **Add** — the integration will appear in your list
 
-1. Open a new Claude chat
-2. Open the tools/connectors menu
-3. Confirm `freshservice` appears
-4. Ask Claude something like:
+### Enabling the connector in a chat
 
-```text
-Use Freshservice to get ticket 12345.
-```
+The integration is not active by default in every conversation. To use it:
 
-If Claude asks for approval, approve it.
+1. Open a new chat
+2. Click the **tools icon** (the plug/connector icon in the message bar)
+3. Toggle **Freshservice** on
+4. Claude will now have access to all Freshservice tools in that conversation
 
----
+### Configuring permissions
 
-## 9. First useful prompts to try
+When a tool is called for the first time, Claude Web will prompt you to **allow or deny** it. You can set a standing permission so you are not asked every time:
 
-Try prompts like these in Claude Desktop:
+1. When the permission prompt appears, check **"Always allow"** to approve that tool for all future calls in this session
+2. To manage permissions across sessions, go to **Settings → Integrations → Freshservice → Manage permissions**
+3. From there you can:
+   - Allow all tools from this connector without prompting
+   - Block specific tools (e.g. delete operations) while allowing read tools
+   - Reset all permissions back to ask-every-time
 
-```text
-Use Freshservice to get ticket 12345.
-```
-
-```text
-Use Freshservice to list my 10 most recently updated tickets.
-```
-
-```text
-Use Freshservice to search tickets with query "status:2 AND priority:3".
-```
-
-```text
-Use Freshservice to create a ticket for jane@example.com with subject "Laptop issue" and description "User cannot connect to VPN".
-```
-
-```text
-Use Freshservice raw_request to GET /api/v2/problems?page=1&per_page=10.
-```
+> **Tip:** It is recommended to allow read tools freely but keep a prompt on write/delete tools (`delete_ticket`, `delete_asset`, `permanently_delete_*`, etc.) so you stay in control of destructive operations.
 
 ---
 
-## 10. Recommended development workflow
+## Authentication
 
-Use this method every time you extend the integration.
+Credentials are **not stored server-side** between sessions. Call `configure_freshservice_instance` at the start of each session:
 
-### Phase A — start with raw coverage
-
-Use `raw_request` first so you can access any endpoint quickly.
-
-Examples:
-
-- `/api/v2/problems`
-- `/api/v2/releases`
-- `/api/v2/assets`
-- `/api/v2/changes`
-- `/api/v2/requesters`
-
-### Phase B — inspect real responses
-
-Use the raw endpoint against your own Freshservice instance and inspect:
-
-- required fields
-- optional fields
-- enum values
-- paging behavior
-- error messages
-
-### Phase C — add dedicated tools
-
-When you know the real request and response shape, add a dedicated MCP tool for that endpoint.
-
-Good candidates:
-
-- `list_problems`
-- `get_problem`
-- `create_change`
-- `list_assets`
-- `get_release`
-
-### Phase D — make tools safer
-
-For write operations:
-
-- narrow schemas
-- validate inputs strictly
-- keep descriptive tool names
-- separate read tools from write tools
-
-### Phase E — version and publish
-
-After testing:
-
-```powershell
-git add .
-git commit -m "Add Freshservice MCP server"
-git push origin main
-```
+| Parameter | Required | Description |
+|---|---|---|
+| `domain` | Yes | e.g. `yourcompany.freshservice.com` |
+| `api_key` | Yes | Freshservice API key (Basic Auth, password = `X`) |
+| `workspace_id` | No | Default: `2` (IT workspace). Needed for Solutions API. |
 
 ---
 
-## 11. Recommended repo structure
+## Tool coverage
 
-```text
-freshservice-mcp/
-├─ src/
-│  └─ index.ts
-├─ dist/
-├─ .env.example
-├─ .gitignore
-├─ package.json
-├─ tsconfig.json
-└─ README.md
+| Area | Tools |
+|---|---|
+| Tickets | list, get, create, update, delete, restore, conversations, approvals, CSAT, child tickets, major incident |
+| Problems | list, get, create, update, delete, restore, notes |
+| Changes | list, get, create, update, delete, notes, approvals |
+| Releases | list, get, create, update, delete, restore, notes |
+| Assets | list, get, create, update, delete, restore, components, types, relationships, history |
+| Software | list, get, create, update, delete, users, licenses, installations |
+| Contracts | list, get, create, update, delete, approval workflow, assets, types |
+| Service Catalog | list/search items, place requests, CRUD items, shared fields |
+| Knowledge Base | categories, folders, articles — full CRUD with workspace scoping |
+| Agents & Requesters | full CRUD, field definitions, convert, forget |
+| Groups & Departments | agent groups, requester groups, member management |
+| Projects (ITSM) | list, get, create, update, delete, members |
+| Projects (PM/NewGen) | full CRUD, tasks, members, templates, sprints |
+| On-call | schedules, shifts, overrides, escalation policies |
+| Status Pages | incidents, maintenance, subscribers, service components |
+| Approvals | global list, approval groups CRUD, service request approvals |
+| Misc | audit logs, workspaces, announcements, SLA, CAB, journeys, delegations, onboarding, alerts, canned responses, post-incident reports, custom objects, purchase orders, vendors, products |
+
+---
+
+## Running locally
+
+```bash
+git clone https://github.com/rutgerbo/Freshservice-MCP-connector.git
+cd Freshservice-MCP-connector
+npm install
+npm run build
+PORT=8080 node dist/index.js
 ```
 
-As the server grows, split it like this:
+The server listens on `http://localhost:8080/mcp`.
 
-```text
+---
+
+## Deploying to Railway
+
+The repo is configured for Railway auto-deploy on push to `main`. No environment variables required — all credentials are passed per-session via `configure_freshservice_instance`.
+
+Health check: `GET /health`
+Discovery: `GET /.well-known/mcp`
+
+---
+
+## Project structure
+
+```
 src/
-├─ index.ts
-├─ config.ts
-├─ client/
-│  └─ freshservice.ts
-├─ tools/
-│  ├─ tickets.ts
-│  ├─ problems.ts
-│  ├─ changes.ts
-│  └─ assets.ts
-└─ utils/
-   └─ errors.ts
+├─ index.ts                  # Express server, session management, tool registration
+├─ freshserviceClient.ts     # Axios client factory + getWorkspaceId helper
+├─ sessionStore.ts           # In-memory per-session credential store
+├─ pagination.ts             # fetchAllPages helper
+├─ response.ts               # mcpResponse serializer
+├─ errors.ts                 # handleApiError with safe JSON serialization
+└─ tools/
+   ├─ tickets.ts
+   ├─ problems.ts
+   ├─ changes.ts
+   ├─ releases.ts
+   ├─ assets.ts
+   ├─ software.ts
+   ├─ contracts.ts
+   ├─ serviceCatalog.ts
+   ├─ knowledgeBase.ts
+   ├─ agents.ts
+   ├─ requesters.ts
+   ├─ groups.ts
+   ├─ departments.ts
+   ├─ locations.ts
+   ├─ projects.ts
+   ├─ pmProjects.ts
+   ├─ approvals.ts
+   ├─ collaborate.ts
+   ├─ oncall.ts
+   ├─ statusPage.ts
+   └─ ... (30+ tool files)
 ```
 
 ---
 
-## 12. How authentication works
+## Security notes
 
-Freshservice API key auth is sent as **HTTP Basic Auth**:
-
-- username = your API key
-- password = `X`
-
-This template creates the `Authorization: Basic ...` header automatically in code.
-
----
-
-## 13. How to add a new endpoint
-
-Example: add `list_problems`.
-
-### Step 1
-Check the endpoint in the Freshservice API docs.
-
-### Step 2
-Add a new tool registration in `src/index.ts`.
-
-### Step 3
-Use:
-
-```ts
-const result = await freshserviceRequest({
-  path: "/api/v2/problems",
-  query: { page, per_page }
-});
-```
-
-### Step 4
-Return the response through `textResult(result.data)`.
-
-### Step 5
-Rebuild:
-
-```powershell
-npm run build
-```
-
-### Step 6
-Restart Claude Desktop.
-
----
-
-## 14. Troubleshooting
-
-### Claude Desktop does not show the server
-
-Check:
-
-- JSON syntax in `claude_desktop_config.json`
-- absolute path to `dist/index.js`
-- Node is installed and available in PATH
-- you restarted Claude Desktop fully
-
-### Server starts but tools fail
-
-Check:
-
-- correct Freshservice domain
-- correct API key
-- the API key has permission for the resource
-- the endpoint exists in your Freshservice plan
-
-### Claude says the server crashed
-
-Most common reasons:
-
-- missing environment variables
-- wrong file path in config
-- TypeScript not built yet
-- logging accidentally sent to stdout instead of stderr
-
-### I changed code but Claude still uses the old version
-
-Run:
-
-```powershell
-npm run build
-```
-
-Then fully quit and reopen Claude Desktop.
-
----
-
-## 15. Security recommendations
-
-- Use a dedicated Freshservice API key for this integration
-- Keep the account scope as narrow as practical
-- Never commit `.env`
-- Treat `raw_request` as a power tool
-- Add more dedicated tools for common write operations instead of relying on generic writes forever
-
----
-
-## 16. Suggested next improvements
-
-1. Split tools into separate files
-2. Add endpoint-specific tools for Problems, Releases, Assets, and Changes
-3. Add stronger response shaping so Claude sees cleaner outputs
-4. Add unit tests around request building and error handling
-5. Add a GitHub Actions workflow for `npm ci` and `npm run check`
-
----
-
-## 17. Minimal GitHub Actions example
-
-Create `.github/workflows/ci.yml`:
-
-```yaml
-name: ci
-
-on:
-  push:
-  pull_request:
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-      - run: npm ci
-      - run: npm run check
-      - run: npm run build
-```
-
----
-
-## 18. Publishing options
-
-You have three good deployment options.
-
-### Option 1 — Local only
-
-Best for Claude Desktop on your Windows PC.
-
-- keep repo in GitHub
-- run the built server locally through Claude Desktop
-
-### Option 2 — Private npm package
-
-Good when multiple team members need the same server.
-
-### Option 3 — Remote MCP later
-
-If you later want centralized hosting, you can move from local stdio to a remote MCP transport. For Claude Desktop on Windows, local stdio is the simplest place to start.
-
----
-
-## 19. Example Git commands
-
-```powershell
-git init
-git add .
-git commit -m "Initial Freshservice MCP server"
-git branch -M main
-git remote add origin https://github.com/YOUR_GITHUB_USERNAME/freshservice-mcp.git
-git push -u origin main
-```
-
----
-
-## 20. Final checklist
-
-Before opening Claude Desktop, confirm all of these are true:
-
-- `npm install` completed
-- `npm run build` completed
-- `dist/index.js` exists
-- `claude_desktop_config.json` has the correct absolute path
-- `FRESHSERVICE_DOMAIN` is correct
-- `FRESHSERVICE_API_KEY` is correct
-- Claude Desktop was restarted
-
+- API keys are held **in memory only** for the duration of the session and never persisted or logged
+- Each Railway instance is single-tenant per deployment; session state is not shared across processes
+- Use a dedicated Freshservice API key with the minimum required permissions
+- CORS is open (`*`) since the server is intended for use with Claude clients — restrict if needed
