@@ -133,7 +133,12 @@ export function registerKnowledgeBaseTools(server: any) {
       folder_id: z.number(),
       status: z.number().optional(),
       tags: z.array(z.string()).optional(),
-      keywords: z.array(z.string()).optional()
+      keywords: z.array(z.string()).optional(),
+      cloud_files: z.array(z.object({
+        name: z.string(),
+        url: z.string(),
+        file_type: z.string().optional()
+      })).optional()
     },
     async (params: any, ctx: any) => {
       try {
@@ -158,7 +163,12 @@ export function registerKnowledgeBaseTools(server: any) {
       description: z.string().optional(),
       status: z.number().optional(),
       tags: z.array(z.string()).optional(),
-      keywords: z.array(z.string()).optional()
+      keywords: z.array(z.string()).optional(),
+      cloud_files: z.array(z.object({
+        name: z.string(),
+        url: z.string(),
+        file_type: z.string().optional()
+      })).optional()
     },
     async ({ article_id, ...updates }: any, ctx: any) => {
       try {
