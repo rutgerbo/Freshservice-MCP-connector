@@ -47,15 +47,14 @@ export function registerKnowledgeBaseTools(server: any) {
   server.tool(
     "list_solution_folders",
     {
-      category_id: z.number(),
+      category_id: z.number().optional(),
       page: z.number().optional(),
       per_page: z.number().max(100).optional()
     },
     async ({ category_id, page, per_page }: any, ctx: any) => {
       try {
-        const workspace_id = getWorkspaceId(ctx.sessionId);
-        const res = await getClient(ctx.sessionId).get(`/solutions/categories/${category_id}/folders`, {
-          params: { page, per_page, workspace_id }
+        const res = await getClient(ctx.sessionId).get("/solutions/folders", {
+          params: { category_id, page, per_page }
         });
         return mcpResponse(res.data);
       } catch (e) {
@@ -72,10 +71,7 @@ export function registerKnowledgeBaseTools(server: any) {
     },
     async ({ folder_id }: any, ctx: any) => {
       try {
-        const workspace_id = getWorkspaceId(ctx.sessionId);
-        const res = await getClient(ctx.sessionId).get(`/solutions/folders/${folder_id}`, {
-          params: { workspace_id }
-        });
+        const res = await getClient(ctx.sessionId).get(`/solutions/folders/${folder_id}`);
         return mcpResponse(res.data);
       } catch (e) {
         return handleApiError(e);
@@ -87,17 +83,15 @@ export function registerKnowledgeBaseTools(server: any) {
   server.tool(
     "list_solution_articles",
     {
-      folder_id: z.number(),
+      folder_id: z.number().optional(),
       page: z.number().optional(),
       per_page: z.number().optional()
     },
     async ({ folder_id, page, per_page }: any, ctx: any) => {
       try {
-        const workspace_id = getWorkspaceId(ctx.sessionId);
-        const res = await getClient(ctx.sessionId).get(
-          `/solutions/folders/${folder_id}/articles`,
-          { params: { page, per_page, workspace_id } }
-        );
+        const res = await getClient(ctx.sessionId).get("/solutions/articles", {
+          params: { folder_id, page, per_page }
+        });
         return mcpResponse(res.data);
       } catch (e) {
         return handleApiError(e);
