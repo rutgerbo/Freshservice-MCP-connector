@@ -114,7 +114,8 @@ export function registerAgentTools(server: any) {
       time_zone: z.string().optional(),
       language: z.string().optional(),
       role_ids: z.array(z.number()).optional(),
-      group_ids: z.array(z.number()).optional()
+      group_ids: z.array(z.number()).optional(),
+      occasional: z.boolean().optional()
     },
     async ({ agent_id, ...updates }: any, ctx: any) => {
       try {
