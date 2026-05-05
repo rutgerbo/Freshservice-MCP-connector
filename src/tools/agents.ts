@@ -88,7 +88,13 @@ export function registerAgentTools(server: any) {
       time_zone: z.string().optional(),
       language: z.string().optional(),
       role_ids: z.array(z.number()).optional(),
-      group_ids: z.array(z.number()).optional()
+      group_ids: z.array(z.number()).optional(),
+      vip_user: z.boolean().optional(),
+      reporting_manager_id: z.number().optional(),
+      address: z.string().optional(),
+      time_format: z.string().optional(),
+      background_information: z.string().optional(),
+      auto_assign_tickets: z.boolean().optional()
     },
     async (params: any, ctx: any) => {
       try {
@@ -115,7 +121,13 @@ export function registerAgentTools(server: any) {
       language: z.string().optional(),
       role_ids: z.array(z.number()).optional(),
       group_ids: z.array(z.number()).optional(),
-      occasional: z.boolean().optional()
+      occasional: z.boolean().optional(),
+      vip_user: z.boolean().optional(),
+      reporting_manager_id: z.number().optional(),
+      address: z.string().optional(),
+      time_format: z.string().optional(),
+      background_information: z.string().optional(),
+      auto_assign_tickets: z.boolean().optional()
     },
     async ({ agent_id, ...updates }: any, ctx: any) => {
       try {

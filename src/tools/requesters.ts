@@ -69,7 +69,12 @@ export function registerRequesterTools(server: any) {
       department_ids: z.array(z.number()).optional(),
       location_id: z.number().optional(),
       time_zone: z.string().optional(),
-      language: z.string().optional()
+      language: z.string().optional(),
+      vip_user: z.boolean().optional(),
+      reporting_manager_id: z.number().optional(),
+      address: z.string().optional(),
+      time_format: z.string().optional(),
+      background_information: z.string().optional()
     },
     async (params: any, ctx: any) => {
       try {
@@ -96,7 +101,12 @@ export function registerRequesterTools(server: any) {
       department_ids: z.array(z.number()).optional(),
       location_id: z.number().optional(),
       time_zone: z.string().optional(),
-      language: z.string().optional()
+      language: z.string().optional(),
+      vip_user: z.boolean().optional(),
+      reporting_manager_id: z.number().optional(),
+      address: z.string().optional(),
+      time_format: z.string().optional(),
+      background_information: z.string().optional()
     },
     async ({ requester_id, ...updates }: any, ctx: any) => {
       try {
